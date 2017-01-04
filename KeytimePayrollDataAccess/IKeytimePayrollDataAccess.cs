@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KeytimePayrollDataAccess
+namespace KeytimePayroll.DataAccess
 {
-    public class Class1
+    interface IKeytimePayrollDataAccess
     {
+
     }
 }

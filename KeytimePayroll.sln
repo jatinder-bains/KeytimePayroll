@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeytimePayrollDataAccess", "KeytimePayrollDataAccess\KeytimePayrollDataAccess.csproj", "{BF07B879-7DF3-485F-BFCA-65E0F0B0AC88}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeytimePayroll.DataAccess", "KeytimePayrollDataAccess\KeytimePayroll.DataAccess.csproj", "{BF07B879-7DF3-485F-BFCA-65E0F0B0AC88}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
