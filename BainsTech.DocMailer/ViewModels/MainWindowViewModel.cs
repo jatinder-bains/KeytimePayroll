@@ -10,13 +10,25 @@ namespace BainsTech.DocMailer.ViewModels
     internal class MainWindowViewModel : IMainWindowViewModel
     {
         private readonly IDocumentHandler documentHandler;
-        public string StartImportText { get; set; }
+        private readonly IConfigurationSettings configurationSettings;
 
-        public MainWindowViewModel(IDocumentHandler documentHandler)
+        public string StartImportText { get; set; }
+        public string DocumentsLocation { get; private set; }
+        public string DocumentExtension { get; private set; }
+
+        public MainWindowViewModel(IDocumentHandler documentHandler, IConfigurationSettings configurationSettings)
         {
             this.documentHandler = documentHandler;
-            var c = documentHandler.GetDocumentsByExtension("pdf");
+            this.configurationSettings = configurationSettings;
+            Initialise();
+        }
+
+        private void Initialise()
+        {
+            var c = documentHandler.GetDocumentsByExtension(@"C:\tmp\PAYE", "pdf");
             StartImportText = "Start Mailing " + c.Count();
+            DocumentsLocation = "Documents Location: " + configurationSettings.DocumentsLocation;
+            DocumentExtension = "Document Type: " + configurationSettings.DocumentExtension;
         }
     }
 }

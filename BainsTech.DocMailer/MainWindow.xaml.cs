@@ -21,6 +21,8 @@ namespace BainsTech.DocMailer
             
             builder.RegisterType<DocumentHandler>().As<IDocumentHandler>();
             builder.RegisterType<MainWindowViewModel>().As<IMainWindowViewModel>();
+            builder.RegisterType<ConfigurationSettings>().As<IConfigurationSettings>();
+            builder.RegisterType<MailerDocumentsViewModel>().As<IMailerDocumentsViewModel>();
 
             Container = builder.Build();
 

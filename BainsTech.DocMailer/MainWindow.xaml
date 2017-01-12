@@ -13,8 +13,22 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
-        <Button Content="{Binding StartImportText}"/>
+
+        <GroupBox Margin="5"  >
+            <StackPanel Orientation="Horizontal">
+                <Label Content="{Binding DocumentsLocation}"/>
+                <Label Content="{Binding DocumentExtension}"/>
+            </StackPanel>
+            
+                   
+
+        </GroupBox>
+        
+        
+
+
     </Grid>
+
+    
 </Window>

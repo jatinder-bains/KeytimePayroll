@@ -1,17 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using BainsTech.DocMailer.DataObjects;
 
 namespace BainsTech.DocMailer.Components
 {
     internal class DocumentHandler : IDocumentHandler
     {
-        public IEnumerable<Document> GetDocumentsByExtension(string extension)
+        public IEnumerable<Document> GetDocumentsByExtension(string folderPath, string extension)
         {
-            return new Document[]
-            {
-                new Document {FileName = "Doc1." + extension},
-                new Document {FileName = "Doc2." + extension}
-            };
+            if (string.IsNullOrEmpty(folderPath)) throw new ArgumentNullException(nameof(folderPath));
+            if (string.IsNullOrEmpty(extension)) throw new ArgumentNullException(nameof(extension));
+
+            //var folder = new DirectoryInfo(folderPath);
+            var files = Directory.GetFiles(folderPath, "*." + extension);
+
+            var docs = files.Select(f => new Document {FileName = f}).ToList();
+            return docs;
         }
     }
 }
