@@ -20,23 +20,31 @@ namespace BainsTech.DocMailer.Components
             if (string.IsNullOrEmpty(folderPath)) throw new ArgumentNullException(nameof(folderPath));
             if (string.IsNullOrEmpty(extension)) throw new ArgumentNullException(nameof(extension));
 
-            var files = Directory.GetFiles(folderPath, "*." + extension);
-            
             var docs = new List<Document>();
 
-            foreach (var file in files)
+            try
             {
-                var fileName = Path.GetFileName(file);
-                var companyNameKey = fileName?.Split(' ').First();
-                
-                var doc = new Document
-                {
-                    FilePath = file,
-                    FileName = fileName,
-                    EmailAddress = companyNameKey != null? configurationSettings.GetEmailForCompany(companyNameKey) : "??"
-                };
-                docs.Add(doc);
+                var files = Directory.GetFiles(folderPath, "*." + extension);
 
+                foreach (var file in files)
+                {
+                    var fileName = Path.GetFileName(file);
+                    var companyNameKey = fileName?.Split(' ').First();
+
+                    var doc = new Document
+                    {
+                        FilePath = file,
+                        FileName = fileName,
+                        EmailAddress =
+                            companyNameKey != null ? configurationSettings.GetEmailForCompany(companyNameKey) : "??"
+                    };
+                    docs.Add(doc);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                
             }
             //var docs = files.Select(f => new Document {FileName = f}).ToList();
             return docs;

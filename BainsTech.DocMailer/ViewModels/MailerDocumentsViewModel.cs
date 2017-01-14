@@ -4,6 +4,8 @@ using BainsTech.DocMailer.Components;
 using BainsTech.DocMailer.DataObjects;
 using BainsTech.DocMailer.Infrastructure;
 
+//using BainsTech.DocMailer.Infrastructure;
+
 //http://stackoverflow.com/questions/29005908/c-sharp-observablecollection-wpf-gridview-binding
 
 namespace BainsTech.DocMailer.ViewModels
@@ -24,8 +26,7 @@ namespace BainsTech.DocMailer.ViewModels
 
         public ICommand RefreshDocumentsListCommand { get; set; }
         public ObservableCollection<Document> Documents { get; set; }
-
-
+        
         public void CreateRefreshDocumentsListCommand()
         {
             RefreshDocumentsListCommand = new RelayCommand(RefreshDocumentsList);

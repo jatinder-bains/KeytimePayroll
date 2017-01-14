@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using BainsTech.DocMailer.Components;
+using BainsTech.DocMailer.Infrastructure;
 
 namespace BainsTech.DocMailer.ViewModels
 {
@@ -11,17 +14,26 @@ namespace BainsTech.DocMailer.ViewModels
     {
         private readonly IDocumentHandler documentHandler;
         private readonly IConfigurationSettings configurationSettings;
+        
         public IMailerDocumentsViewModel MailerDocumentsViewModel { get; set; }
+        public IPasswordConfigViewModel PasswordConfigViewModel { get; set; }
 
         public string StartImportText { get; set; }
         public string DocumentsLocation { get; private set; }
         public string DocumentExtension { get; private set; }
 
-        public MainWindowViewModel(IDocumentHandler documentHandler, IConfigurationSettings configurationSettings, IMailerDocumentsViewModel mailerDocumentsViewModel)
+        public ICommand SetPasswordCommandMain { get; set; }
+
+        public MainWindowViewModel(
+            IDocumentHandler documentHandler,
+            IConfigurationSettings configurationSettings,
+            IMailerDocumentsViewModel mailerDocumentsViewModel, 
+            IPasswordConfigViewModel passwordConfigViewModel)
         {
             this.documentHandler = documentHandler;
             this.configurationSettings = configurationSettings;
-            this.MailerDocumentsViewModel = mailerDocumentsViewModel;
+            MailerDocumentsViewModel = mailerDocumentsViewModel;
+            PasswordConfigViewModel = passwordConfigViewModel;
             Initialise();
         }
 
@@ -31,7 +43,12 @@ namespace BainsTech.DocMailer.ViewModels
             StartImportText = "Start Mailing " + c.Count();
             DocumentsLocation = "Documents Location: " + configurationSettings.DocumentsLocation;
             DocumentExtension = "Document Type: " + configurationSettings.DocumentExtension;
+            SetPasswordCommandMain = new RelayCommand(SetPassword);
         }
-       
+
+        private void SetPassword(object obj)
+        {
+            
+        }
     }
 }

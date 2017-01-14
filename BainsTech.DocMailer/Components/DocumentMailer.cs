@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using BainsTech.DocMailer.DataObjects;
 
 // http://www.serversmtp.com/en/smtp-yahoo
@@ -10,7 +11,7 @@ namespace BainsTech.DocMailer.Components
     {
         public string EmailDocuments(IEnumerable<Document> documents)
         {
-            throw new System.NotImplementedException();
+            return "";
         }
     }
 }
