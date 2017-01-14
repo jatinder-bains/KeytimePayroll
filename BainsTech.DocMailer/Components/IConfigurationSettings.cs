@@ -4,5 +4,9 @@
     {
         string DocumentsLocation { get; }
         string DocumentExtension { get; }
+
+        string GetEmailForCompany(string companyName);
     }
+
+
 }

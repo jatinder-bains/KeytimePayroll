@@ -11,15 +11,17 @@ namespace BainsTech.DocMailer.ViewModels
     {
         private readonly IDocumentHandler documentHandler;
         private readonly IConfigurationSettings configurationSettings;
+        public IMailerDocumentsViewModel MailerDocumentsViewModel { get; set; }
 
         public string StartImportText { get; set; }
         public string DocumentsLocation { get; private set; }
         public string DocumentExtension { get; private set; }
 
-        public MainWindowViewModel(IDocumentHandler documentHandler, IConfigurationSettings configurationSettings)
+        public MainWindowViewModel(IDocumentHandler documentHandler, IConfigurationSettings configurationSettings, IMailerDocumentsViewModel mailerDocumentsViewModel)
         {
             this.documentHandler = documentHandler;
             this.configurationSettings = configurationSettings;
+            this.MailerDocumentsViewModel = mailerDocumentsViewModel;
             Initialise();
         }
 
@@ -30,5 +32,6 @@ namespace BainsTech.DocMailer.ViewModels
             DocumentsLocation = "Documents Location: " + configurationSettings.DocumentsLocation;
             DocumentExtension = "Document Type: " + configurationSettings.DocumentExtension;
         }
+       
     }
 }

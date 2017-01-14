@@ -5,28 +5,44 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BainsTech.DocMailer"
         mc:Ignorable="d"
-        Title="Document Mailer" Height="350" Width="525">
+        Title="Document Mailer" Height="500" Width="700">
     <Grid>        
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
+        <!--Row 0-->
         <GroupBox Margin="5"  >
             <StackPanel Orientation="Horizontal">
                 <Label Content="{Binding DocumentsLocation}"/>
                 <Label Content="{Binding DocumentExtension}"/>
             </StackPanel>
-            
-                   
-
         </GroupBox>
-        
-        
 
+        <!--Row 1-->
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <Button Grid.Row="1"  Content="Get Mailer Documents" Height="35"
+                Command="{Binding Path=MailerDocumentsViewModel.RefreshDocumentsListCommand}"/>
+
+        </StackPanel>
+        
+        <!--Row 2-->
+        <ListView Grid.Row="2" ItemsSource="{Binding Path=MailerDocumentsViewModel.Documents}">
+            <ListView.View>
+                <GridView >
+                    <GridViewColumn Header="Document" Width="250"  DisplayMemberBinding="{Binding FileName}"/>
+                    <GridViewColumn Header="Email Address"  DisplayMemberBinding="{Binding EmailAddress}"/>
+                    <GridViewColumn Header="Sent"  DisplayMemberBinding="{Binding Sent}"/>
+                    <GridViewColumn Header="SendResult" Width="200" DisplayMemberBinding="{Binding SendResult}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
 
     </Grid>
 

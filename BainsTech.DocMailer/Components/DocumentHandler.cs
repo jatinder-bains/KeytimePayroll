@@ -8,6 +8,13 @@ namespace BainsTech.DocMailer.Components
 {
     internal class DocumentHandler : IDocumentHandler
     {
+        private IConfigurationSettings configurationSettings;
+
+        public DocumentHandler(IConfigurationSettings configurationSettings)
+        {
+            this.configurationSettings = configurationSettings;
+        }
+
         public IEnumerable<Document> GetDocumentsByExtension(string folderPath, string extension)
         {
             if (string.IsNullOrEmpty(folderPath)) throw new ArgumentNullException(nameof(folderPath));
@@ -15,8 +22,23 @@ namespace BainsTech.DocMailer.Components
 
             //var folder = new DirectoryInfo(folderPath);
             var files = Directory.GetFiles(folderPath, "*." + extension);
+            
+            var docs = new List<Document>();
 
-            var docs = files.Select(f => new Document {FileName = f}).ToList();
+            foreach (var file in files)
+            {
+                var fileName = Path.GetFileName(file);
+                var companyNameKey = fileName?.Split(' ').First();
+                
+                var doc = new Document
+                {
+                    FileName = fileName,
+                    EmailAddress = companyNameKey != null? configurationSettings.GetEmailForCompany(companyNameKey) : "??"
+                };
+                docs.Add(doc);
+
+            }
+            //var docs = files.Select(f => new Document {FileName = f}).ToList();
             return docs;
         }
     }

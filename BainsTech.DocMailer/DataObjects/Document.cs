@@ -1,16 +1,66 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using BainsTech.DocMailer.Annotations;
 
 namespace BainsTech.DocMailer.DataObjects
 {
-    public class Document 
+    public class Document : INotifyPropertyChanged
     {
-        public string FileName { get; set; }
-        public string EmailAddress { get; set; }
-        public bool Sent { get; set; }
-        public string SendError { get; set; }
+        private string emailAddress;
+        private string fileName;
+        private string sendResult;
+        private bool sent;
+
+        public string FileName
+        {
+            get { return fileName; }
+            set
+            {
+                if (fileName == value) return;
+                fileName = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string EmailAddress
+        {
+            get { return emailAddress; }
+            set
+            {
+                if (emailAddress == value) return;
+                emailAddress = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool Sent
+        {
+            get { return sent; }
+            set
+            {
+                if (sent == value) return;
+                sent = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string SendResult
+        {
+            get { return sendResult; }
+            set
+            {
+                if (sendResult == value) return;
+                sendResult = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

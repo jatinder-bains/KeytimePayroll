@@ -65,6 +65,8 @@
     <Compile Include="Components\IConfigurationSettings.cs" />
     <Compile Include="Components\IDocumentHandler.cs" />
     <Compile Include="DataObjects\Document.cs" />
+    <Compile Include="Infrastructure\RelayCommand.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="ViewModels\IMailerDocumentsViewModel.cs" />
     <Compile Include="ViewModels\IMainWindowViewModel.cs" />
     <Compile Include="ViewModels\MailerDocumentsViewModel.cs" />
@@ -100,6 +102,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Documentation\DocumentMailer.docx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
