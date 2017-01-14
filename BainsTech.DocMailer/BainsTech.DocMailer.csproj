@@ -62,8 +62,10 @@
     </ApplicationDefinition>
     <Compile Include="Components\ConfigurationSettings.cs" />
     <Compile Include="Components\DocumentHandler.cs" />
+    <Compile Include="Components\DocumentMailer.cs" />
     <Compile Include="Components\IConfigurationSettings.cs" />
     <Compile Include="Components\IDocumentHandler.cs" />
+    <Compile Include="Components\IDocumentMailer.cs" />
     <Compile Include="DataObjects\Document.cs" />
     <Compile Include="Infrastructure\RelayCommand.cs" />
     <Compile Include="Properties\Annotations.cs" />

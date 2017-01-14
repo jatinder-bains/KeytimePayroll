@@ -11,16 +11,9 @@ namespace BainsTech.DocMailer.DataObjects
         private string sendResult;
         private bool sent;
 
-        public string FileName
-        {
-            get { return fileName; }
-            set
-            {
-                if (fileName == value) return;
-                fileName = value;
-                OnPropertyChanged();
-            }
-        }
+        public string FilePath { get; set; }
+
+        public string FileName { get; set; }
 
         public string EmailAddress
         {
