@@ -5,6 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Document Mailer" Height="500" Width="700">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
     <Grid>        
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -20,8 +23,10 @@
             <StackPanel Orientation="Horizontal">
                 <Label Content="{Binding DocumentsLocation}"/>
                 <Label Content="{Binding DocumentExtension}"/>
-                <PasswordBox Name="PasswordBox" Width="150" />
-                <Button Content="Set Password" Click="SetPasswordButton_OnClick"/>
+                
+                <PasswordBox Name="PasswordBox" Width="150" Visibility="{Binding PasswordConfigViewModel.IsEmailPasswordNeeded, Converter={StaticResource BoolToVis}}" />
+                <Button Content="Set Password" Click="SetPasswordButton_OnClick" Visibility="{Binding PasswordConfigViewModel.IsEmailPasswordNeeded, Converter={StaticResource BoolToVis}}"/>
+                
             </StackPanel>
         </GroupBox>
 

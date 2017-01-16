@@ -34,6 +34,7 @@ namespace BainsTech.DocMailer
             builder.RegisterType<ConfigurationSettings>().As<IConfigurationSettings>();
             builder.RegisterType<MailerDocumentsViewModel>().As<IMailerDocumentsViewModel>();
             builder.RegisterType<PasswordConfigViewModel>().As<IPasswordConfigViewModel>();
+            builder.RegisterType<Logger>().As<ILogger>().SingleInstance();
             
             Container = builder.Build();
 

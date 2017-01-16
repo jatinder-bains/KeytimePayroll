@@ -9,10 +9,12 @@ namespace BainsTech.DocMailer.Components
     internal class DocumentHandler : IDocumentHandler
     {
         private readonly IConfigurationSettings configurationSettings;
+        private readonly ILogger logger;
 
-        public DocumentHandler(IConfigurationSettings configurationSettings)
+        public DocumentHandler(IConfigurationSettings configurationSettings, ILogger logger)
         {
             this.configurationSettings = configurationSettings;
+            this.logger = logger;
         }
 
         public IEnumerable<Document> GetDocumentsByExtension(string folderPath, string extension)
@@ -44,9 +46,10 @@ namespace BainsTech.DocMailer.Components
             }
             catch (Exception ex)
             {
-                
+                // TODO: Show errors in status bar via ErrorViewModel...
+                logger.Error(ex, "GetDocumentsByExtension() encountered exception");
             }
-            //var docs = files.Select(f => new Document {FileName = f}).ToList();
+            
             return docs;
         }
 

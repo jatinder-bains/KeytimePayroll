@@ -14,12 +14,18 @@ namespace BainsTech.DocMailer.ViewModels
     {
         private readonly IConfigurationSettings configurationSettings;
         private readonly IDocumentHandler documentHandler;
+        private readonly ILogger logger;
 
-        public MailerDocumentsViewModel(IDocumentHandler documentHandler, IConfigurationSettings configurationSettings)
+        public MailerDocumentsViewModel(
+            IDocumentHandler documentHandler,
+            IConfigurationSettings configurationSettings, ILogger logger)
         {
             this.documentHandler = documentHandler;
             this.configurationSettings = configurationSettings;
+            this.logger = logger;
             Documents = new ObservableCollection<Document>();
+
+            logger.Info("foo");
 
             CreateRefreshDocumentsListCommand();
         }
@@ -35,6 +41,7 @@ namespace BainsTech.DocMailer.ViewModels
         public void RefreshDocumentsList(object val)
         {
             Documents.Clear();
+
             var documents = documentHandler.GetDocumentsByExtension(
                 configurationSettings.DocumentsLocation, configurationSettings.DocumentExtension);
 
