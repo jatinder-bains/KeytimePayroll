@@ -2,7 +2,7 @@
 {
     internal interface IPasswordConfigViewModel
     {
-        bool IsEmailPasswordNeeded { get; }
+        bool IsEmailPasswordNeeded { get; set; }
         void SetSenderEmailAccountPassword(string encryptedPassword);
     }
 }

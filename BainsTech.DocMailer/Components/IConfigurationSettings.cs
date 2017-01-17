@@ -7,8 +7,13 @@ namespace BainsTech.DocMailer.Components
         string DocumentsLocation { get; }
         string DocumentExtension { get; }
         string SenderEmailAccountPassword { get; }
+        string SenderEmailAccountLogin { get; }
         string SenderEmailAddress { get; }
+        string SmtpAddress { get; }
+        int PortNumber { get; }
+        bool EnableSsl { get; }
         
+       
         string GetEmailForCompany(string companyName);
         void SetSenderEmailAccountPassword(string encryptedPassword);
     }

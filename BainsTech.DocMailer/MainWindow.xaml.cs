@@ -34,6 +34,7 @@ namespace BainsTech.DocMailer
             builder.RegisterType<ConfigurationSettings>().As<IConfigurationSettings>();
             builder.RegisterType<MailerDocumentsViewModel>().As<IMailerDocumentsViewModel>();
             builder.RegisterType<PasswordConfigViewModel>().As<IPasswordConfigViewModel>();
+            builder.RegisterType<DocumentMailer>().As<IDocumentMailer>();
             builder.RegisterType<Logger>().As<ILogger>().SingleInstance();
             
             Container = builder.Build();
@@ -47,7 +48,11 @@ namespace BainsTech.DocMailer
             //var passwordBox = (PasswordBox)sender;
 
             var en = PasswordBox.Password.Encrypt();
-            MainWindowViewModel.PasswordConfigViewModel.SetSenderEmailAccountPassword(en); 
+            MainWindowViewModel.PasswordConfigViewModel.SetSenderEmailAccountPassword(en);
+
+            MessageBox.Show("Password Set");
+            MainWindowViewModel.PasswordConfigViewModel.IsEmailPasswordNeeded = false;
+
         }
     }
 }

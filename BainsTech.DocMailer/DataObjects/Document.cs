@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using BainsTech.DocMailer.Annotations;
+using BainsTech.DocMailer.Properties;
 
 namespace BainsTech.DocMailer.DataObjects
 {
@@ -14,6 +14,11 @@ namespace BainsTech.DocMailer.DataObjects
         public string FilePath { get; set; }
 
         public string FileName { get; set; }
+
+        public Document()
+        {
+            SendResult = "Pending";
+        }
 
         public string EmailAddress
         {

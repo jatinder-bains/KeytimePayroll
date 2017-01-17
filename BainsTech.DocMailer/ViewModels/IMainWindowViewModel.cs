@@ -1,5 +1,4 @@
 ﻿using System.Security;
-using BainsTech.DocMailer.Annotations;
 
 namespace BainsTech.DocMailer.ViewModels
 {

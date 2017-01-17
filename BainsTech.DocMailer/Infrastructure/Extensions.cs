@@ -14,7 +14,7 @@ namespace BainsTech.DocMailer.Infrastructure
                     Encoding.Unicode.GetBytes(text), null, DataProtectionScope.LocalMachine));
         }
 
-        public static string Derypt(this string text)
+        public static string Decrypt(this string text)
         {
             return Encoding.Unicode.GetString(
                 ProtectedData.Unprotect(
