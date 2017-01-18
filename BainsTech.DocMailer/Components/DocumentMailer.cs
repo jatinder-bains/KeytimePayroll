@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Net;
 using System.Net.Mail;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using BainsTech.DocMailer.DataObjects;
+using BainsTech.DocMailer.Exceptions;
 using BainsTech.DocMailer.Infrastructure;
 
 // http://www.serversmtp.com/en/smtp-yahoo
@@ -15,7 +17,8 @@ namespace BainsTech.DocMailer.Components
     internal class DocumentMailer : IDocumentMailer
     {
         private readonly IConfigurationSettings configurationSettings;
-        private ILogger logger;
+        private readonly ILogger logger;
+        private string[] months = {"January","February","March","April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
         public DocumentMailer(IConfigurationSettings configurationSettings, ILogger logger)
         {
@@ -30,48 +33,74 @@ namespace BainsTech.DocMailer.Components
             return "";
         }
 
+        private string SubjectFromFileName(string fileName)
+        {
+            // <CompanyName> Payslips dd-mm-16.pdf
+            var elems = fileName.Split(' ');
+            if (elems.Length != 3)
+            {
+                throw InvalidFileNameFormatException.Create(fileName);
+            }
+            var companyName = elems[0];
+            var type = elems[1];
+            if (string.Compare(type, "PAYE", StringComparison.OrdinalIgnoreCase) != 0 &&
+                string.Compare(type, "PAYROLL", StringComparison.OrdinalIgnoreCase) != 0)
+            {
+                throw InvalidFileNameFormatException.Create(fileName);
+            }
+
+            var dateString = Path.GetFileNameWithoutExtension(elems[2]);
+            DateTime documentDate;
+            if (!DateTime.TryParseExact(dateString, "dd-mm-yy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out documentDate))
+            {
+                throw InvalidFileNameFormatException.Create(fileName);
+            }
+
+            var month = months[documentDate.Month - 1];
+
+            return $"{companyName} {type} {month}";
+        }
+        
         private void EmailDocument(Document document)
         {
-            var smtpAddress = configurationSettings.SmtpAddress;
-            var portNumber = configurationSettings.PortNumber;
-            var enableSsl = configurationSettings.EnableSsl;
-
-            var emailFrom = configurationSettings.SenderEmailAddress;
-            var login = configurationSettings.SenderEmailAccountLogin;
-            var password = configurationSettings.SenderEmailAccountPassword.Decrypt();
-            var emailTo = document.EmailAddress;
-            var subject = "Test email for " + DateTime.Now.ToLongTimeString();
-            var body = "Hello please see attachment " + document.FileName;
-
-            using (var mailMessage = new MailMessage())
+            try
             {
-                mailMessage.From = new MailAddress(emailFrom);
-                mailMessage.To.Add(emailTo);
-                mailMessage.Bcc.Add(emailFrom);
-                mailMessage.Subject = subject;
-                mailMessage.Body = body;
-                mailMessage.IsBodyHtml = true; // Can set to false, if you are sending pure text.
+                var smtpAddress = configurationSettings.SmtpAddress;
+                var portNumber = configurationSettings.PortNumber;
+                var enableSsl = configurationSettings.EnableSsl;
 
-                mailMessage.Attachments.Add(new Attachment(document.FilePath));
-                //mail.Attachments.Add(new Attachment("C:\\SomeZip.zip"));
+                var senderEmailAddress = configurationSettings.SenderEmailAddress;
+                var senderEmailAccountPasword = configurationSettings.SenderEmailAccountPassword.Decrypt();
+                var recipientEmailAddress = document.EmailAddress;
+                var subject = SubjectFromFileName(document.FileName);
+                var body = "Email body TBC - " + document.FileName;
 
-                using (var smtpClient = new SmtpClient(smtpAddress, portNumber))
+                using (var mailMessage = new MailMessage())
                 {
-                    smtpClient.Credentials = new NetworkCredential(login, password);
-                    smtpClient.EnableSsl = enableSsl;
-                    try
+
+                    mailMessage.From = new MailAddress(senderEmailAddress);
+                    mailMessage.To.Add(recipientEmailAddress);
+                    mailMessage.Bcc.Add(senderEmailAddress);
+                    mailMessage.Subject = subject;
+                    mailMessage.Body = body;
+                    mailMessage.IsBodyHtml = true;
+
+                    mailMessage.Attachments.Add(new Attachment(document.FilePath));
+
+                    using (var smtpClient = new SmtpClient(smtpAddress, portNumber))
                     {
+                        smtpClient.Credentials = new NetworkCredential(senderEmailAddress, senderEmailAccountPasword);
+                        smtpClient.EnableSsl = enableSsl;
                         logger.Info("Sending " + document.FilePath + "...");
                         smtpClient.Send(mailMessage);
                         logger.Info("Sent " + document.FilePath);
                         document.SendResult = "Sent";
                     }
-                    catch (Exception ex)
-                    {
-                        document.SendResult = "Error:" + ex.Message;
-                    }
                 }
-
+            }
+            catch (Exception ex)
+            {
+                document.SendResult = "Error:" + ex.Message;
             }
         }
 

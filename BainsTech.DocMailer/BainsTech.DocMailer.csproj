@@ -76,6 +76,7 @@
     <Compile Include="DataObjects\Document.cs" />
     <Compile Include="Infrastructure\Extensions.cs" />
     <Compile Include="Infrastructure\RelayCommand.cs" />
+    <Compile Include="Exceptions\InvalidFileNameFormatException.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="ViewModels\IMailerDocumentsViewModel.cs" />
     <Compile Include="ViewModels\IMainWindowViewModel.cs" />

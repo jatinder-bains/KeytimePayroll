@@ -22,7 +22,6 @@ namespace BainsTech.DocMailer.Components
             var appSettings = ConfigurationManager.AppSettings;
             DocumentsLocation = appSettings["DocumentsLocation"];
             DocumentExtension = appSettings["DocumentExtension"];
-            SenderEmailAccountLogin = appSettings["SenderEmailAccountLogin"];
             SenderEmailAddress = appSettings["SenderEmailAddress"];
             SmtpAddress = appSettings["SmtpAddress"];
             PortNumber = int.Parse(appSettings["PortNumber"]);
@@ -52,8 +51,5 @@ namespace BainsTech.DocMailer.Components
 
             ConfigurationManager.RefreshSection("appSettings");
         }
-
-
-        public string SenderEmailAccountLogin { get; }
     }
 }

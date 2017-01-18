@@ -7,7 +7,6 @@ namespace BainsTech.DocMailer.DataObjects
     public class Document : INotifyPropertyChanged
     {
         private string emailAddress;
-        private string fileName;
         private string sendResult;
         private bool sent;
 
