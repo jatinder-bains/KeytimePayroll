@@ -17,13 +17,15 @@ namespace BainsTech.DocMailer.Components
     internal class DocumentMailer : IDocumentMailer
     {
         private readonly IConfigurationSettings configurationSettings;
+        private readonly IDocumentHandler documentHandler;
+            
         private readonly ILogger logger;
-        private string[] months = {"January","February","March","April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
-        public DocumentMailer(IConfigurationSettings configurationSettings, ILogger logger)
+        public DocumentMailer(IConfigurationSettings configurationSettings, ILogger logger, IDocumentHandler documentHandler)
         {
             this.configurationSettings = configurationSettings;
             this.logger = logger;
+            this.documentHandler = documentHandler;
         }
 
         public string EmailDocuments(IEnumerable<Document> documents)
@@ -35,30 +37,13 @@ namespace BainsTech.DocMailer.Components
 
         private string SubjectFromFileName(string fileName)
         {
-            // <CompanyName> Payslips dd-mm-16.pdf
-            var elems = fileName.Split(' ');
-            if (elems.Length != 3)
-            {
-                throw InvalidFileNameFormatException.Create(fileName);
-            }
-            var companyName = elems[0];
-            var type = elems[1];
-            if (string.Compare(type, "PAYE", StringComparison.OrdinalIgnoreCase) != 0 &&
-                string.Compare(type, "PAYROLL", StringComparison.OrdinalIgnoreCase) != 0)
-            {
-                throw InvalidFileNameFormatException.Create(fileName);
-            }
+            string companyName;
+            string type;
+            string month;
 
-            var dateString = Path.GetFileNameWithoutExtension(elems[2]);
-            DateTime documentDate;
-            if (!DateTime.TryParseExact(dateString, "dd-mm-yy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out documentDate))
-            {
-                throw InvalidFileNameFormatException.Create(fileName);
-            }
+            var error = documentHandler.ExtractFileNameComponents(fileName, out companyName, out type, out month);
 
-            var month = months[documentDate.Month - 1];
-
-            return $"{companyName} {type} {month}";
+            return string.IsNullOrEmpty(error) ? $"{companyName} {type} {month}" : error;
         }
         
         private void EmailDocument(Document document)
@@ -93,15 +78,15 @@ namespace BainsTech.DocMailer.Components
                         smtpClient.EnableSsl = enableSsl;
                         logger.Info("Sending " + document.FilePath + "...");
                         smtpClient.Send(mailMessage);
-                        logger.Info("Sent " + document.FilePath);
-                        document.SendResult = "Sent";
+                        logger.Info("IsReadyToSend " + document.FilePath);
+                        document.Status = "IsReadyToSend";
                     }
                 }
             }
             catch (Exception ex)
-            {
-                document.SendResult = "Error:" + ex.Message;
-            }
+                {
+                    document.Status = "Error:" + ex.Message;
+                }
         }
 
     }

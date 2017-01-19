@@ -45,9 +45,8 @@
             <ListView.View>
                 <GridView >
                     <GridViewColumn Header="Document" Width="250"  DisplayMemberBinding="{Binding FileName}"/>
-                    <GridViewColumn Header="Email Address"  DisplayMemberBinding="{Binding EmailAddress}"/>
-                    <GridViewColumn Header="Sent"  DisplayMemberBinding="{Binding Sent}"/>
-                    <GridViewColumn Header="SendResult" Width="200" DisplayMemberBinding="{Binding SendResult}"/>
+                    <GridViewColumn Header="Email Address" Width="250"  DisplayMemberBinding="{Binding EmailAddress}"/>
+                    <GridViewColumn Header="Status" Width="400" DisplayMemberBinding="{Binding Status}"/>
                 </GridView>
             </ListView.View>
         </ListView>

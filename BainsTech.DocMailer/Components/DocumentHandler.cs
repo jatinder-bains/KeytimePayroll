@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using BainsTech.DocMailer.DataObjects;
@@ -40,8 +41,9 @@ namespace BainsTech.DocMailer.Components
                         EmailAddress =
                             companyNameKey != null ? configurationSettings.GetEmailForCompany(companyNameKey) : "??"
                     };
-                    docs.Add(doc);
 
+                    SetDocumentStatus(doc);
+                    docs.Add(doc);
                 }
             }
             catch (Exception ex)
@@ -49,10 +51,68 @@ namespace BainsTech.DocMailer.Components
                 // TODO: Show errors in status bar via ErrorViewModel...
                 logger.Error(ex, "GetDocumentsByExtension() encountered exception");
             }
-            
+
             return docs;
         }
 
-        
+        public bool IsValidFileName(string fileName)
+        {
+            string companyName;
+            string type;
+            string month;
+
+            return string.IsNullOrEmpty(ExtractFileNameComponents(fileName, out companyName, out type, out month));
+        }
+
+        public string ExtractFileNameComponents(string fileName, out string companyName, out string type,
+            out string month)
+        {
+            var errMsg = $"Invalid file name is not in suported format 'CompanyName Paye/Payroll dd-mm-yy'.";
+            string[] months =
+            {
+                "January", "February", "March", "April", "May", "June", "July", "August", "September",
+                "October", "November", "December"
+            };
+
+            companyName = type = month = string.Empty;
+            // <CompanyName> Payslips dd-mm-16.pdf
+            var elems = fileName.Split(' ');
+            if (elems.Length != 3)
+                return errMsg;
+            companyName = elems[0];
+            type = elems[1];
+            if (string.Compare(type, "PAYE", StringComparison.OrdinalIgnoreCase) != 0 &&
+                string.Compare(type, "PAYROLL", StringComparison.OrdinalIgnoreCase) != 0)
+                return errMsg + $"Invalid type '{type}'";
+
+            var dateString = Path.GetFileNameWithoutExtension(elems[2]);
+
+            DateTime date;
+            if (
+                !DateTime.TryParseExact(dateString, "dd-mm-yy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal,
+                    out date))
+                return errMsg + $"Invalid date '{dateString}'";
+
+            month = months[date.Month - 1];
+            return string.Empty; // no errors;
+        }
+
+        private void SetDocumentStatus(Document document)
+        {
+            string companyName;
+            string type;
+            string month;
+
+            var invaidFileNameError = ExtractFileNameComponents(document.FileName, out companyName, out type, out month);
+            if (string.IsNullOrEmpty(invaidFileNameError))
+            {
+                document.IsReadyToSend = true;
+                document.Status = "Ready to send";
+                return;
+            }
+
+            document.IsReadyToSend = false;
+            document.Status = invaidFileNameError;
+        }
     }
 }

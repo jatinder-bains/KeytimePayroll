@@ -7,17 +7,12 @@ namespace BainsTech.DocMailer.DataObjects
     public class Document : INotifyPropertyChanged
     {
         private string emailAddress;
-        private string sendResult;
-        private bool sent;
+        private string status;
+        private bool isReadyToSend;
 
         public string FilePath { get; set; }
 
         public string FileName { get; set; }
-
-        public Document()
-        {
-            SendResult = "Pending";
-        }
 
         public string EmailAddress
         {
@@ -30,28 +25,28 @@ namespace BainsTech.DocMailer.DataObjects
             }
         }
 
-        public bool Sent
+        public bool IsReadyToSend
         {
-            get { return sent; }
+            get { return isReadyToSend; }
             set
             {
-                if (sent == value) return;
-                sent = value;
+                if (isReadyToSend == value) return;
+                isReadyToSend = value;
                 OnPropertyChanged();
             }
         }
 
-        public string SendResult
+        public string Status
         {
-            get { return sendResult; }
+            get { return status; }
             set
             {
-                if (sendResult == value) return;
-                sendResult = value;
+                if (status == value) return;
+                status = value;
                 OnPropertyChanged();
             }
         }
-
+        
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]

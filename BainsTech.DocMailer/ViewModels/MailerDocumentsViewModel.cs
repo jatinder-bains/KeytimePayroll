@@ -64,24 +64,7 @@ namespace BainsTech.DocMailer.ViewModels
 
         public void MailDocuments(object val)
         {
-            documentMailer.EmailDocuments(this.Documents);
-            /*
-            logger.Info("MailerDocumentsViewModel.MailDocuments() - ENTER");
-            Parallel.ForEach(this.Documents, async document =>
-            {
-                var r = new Random(document.FileName.Length);
-                await Task.Delay(r.Next(2, 10) * 1000);
-                
-                document.SendResult = "Sending...";
-                await Task.Delay(r.Next(2,10) * 1000);
-                document.SendResult = "Sent";
-
-            });
-            logger.Info("MailerDocumentsViewModel.MailDocuments() - EXIT");
-            */
-
+            documentMailer.EmailDocuments(this.Documents.Where(d => d.IsReadyToSend));
         }
-
-
     }
 }
