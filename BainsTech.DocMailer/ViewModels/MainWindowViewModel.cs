@@ -21,6 +21,7 @@ namespace BainsTech.DocMailer.ViewModels
         public string StartImportText { get; set; }
         public string DocumentsLocation { get; private set; }
         public string DocumentExtension { get; private set; }
+        public string EmailAddress { get; private set; }
 
         public ICommand SetPasswordCommandMain { get; set; }
 
@@ -41,8 +42,12 @@ namespace BainsTech.DocMailer.ViewModels
         {
             var c = documentHandler.GetDocumentsByExtension(@"C:\tmp\PAYE", "pdf");
             StartImportText = "Start Mailing " + c.Count();
-            DocumentsLocation = "Documents Location: " + configurationSettings.DocumentsLocation;
-            DocumentExtension = "Document Type: " + configurationSettings.DocumentExtension;
+            DocumentsLocation = configurationSettings.DocumentsLocation;
+            DocumentExtension = configurationSettings.DocumentExtension;
+            EmailAddress = !string.IsNullOrEmpty(configurationSettings.SenderEmailAddress)
+                ? configurationSettings.SenderEmailAddress
+                : "!! Not set !!";
+
             SetPasswordCommandMain = new RelayCommand(SetPassword);
         }
 
