@@ -8,5 +8,6 @@ namespace BainsTech.DocMailer.Components
         IEnumerable<Document> GetDocumentsByExtension(string folder, string extension);
         string ExtractFileNameComponents(string fileName, out string companyName, out string type, out string month);
         bool IsValidFileName(string fileName);
+        void MoveDocument(string documentFilePath);
     }
 }

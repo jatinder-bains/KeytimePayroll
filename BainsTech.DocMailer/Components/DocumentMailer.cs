@@ -1,15 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Net;
-using System.Net.Mail;
 using System.Threading.Tasks;
-using BainsTech.DocMailer.Adapters;
 using BainsTech.DocMailer.DataObjects;
-using BainsTech.DocMailer.Exceptions;
 using BainsTech.DocMailer.Factories;
-using BainsTech.DocMailer.Infrastructure;
 
 // http://www.serversmtp.com/en/smtp-yahoo
 // https://msdn.microsoft.com/en-us/library/dd633709.aspx
@@ -20,15 +13,15 @@ namespace BainsTech.DocMailer.Components
     {
         private readonly IConfigurationSettings configurationSettings;
         private readonly IDocumentHandler documentHandler;
+
+
+        private readonly ILogger logger;
         private readonly IMailMessageAdapterFactory mailMessageAdapterFactory;
 
-            
-        private readonly ILogger logger;
-
         public DocumentMailer(
-            IConfigurationSettings configurationSettings, 
-            ILogger logger, 
-            IDocumentHandler documentHandler, 
+            IConfigurationSettings configurationSettings,
+            ILogger logger,
+            IDocumentHandler documentHandler,
             IMailMessageAdapterFactory mailMessageAdapterFactory)
         {
             this.configurationSettings = configurationSettings;
@@ -54,7 +47,7 @@ namespace BainsTech.DocMailer.Components
 
             return string.IsNullOrEmpty(error) ? $"{companyName} {type} {month}" : error;
         }
-        
+
         private void EmailDocument(Document document)
         {
             try
@@ -71,7 +64,6 @@ namespace BainsTech.DocMailer.Components
 
                 using (var mailMessage = mailMessageAdapterFactory.CreateMailMessageAdapter())
                 {
-
                     mailMessage.SetFromAddress(senderEmailAddress);
                     mailMessage.AddToAdress(recipientEmailAddress);
                     mailMessage.AddBccAddress(senderEmailAddress);
@@ -87,8 +79,7 @@ namespace BainsTech.DocMailer.Components
                         smtpClient.SetCredentials(senderEmailAddress, senderEmailAccountPasword);
 
                         smtpClient.EnableSssl = enableSsl;
-                        
-                        document.StatusDesc = "Sending KKK...";
+
                         document.Status = DocumentStatus.Sending;
                         smtpClient.Send(mailMessage);
                         document.Status = DocumentStatus.Sent;
@@ -100,7 +91,12 @@ namespace BainsTech.DocMailer.Components
                 document.Status = DocumentStatus.SendFailed;
                 document.StatusDesc = "Error:" + ex.Message;
             }
-        }
 
+            finally
+            {
+                if (document.Status == DocumentStatus.Sent)
+                    documentHandler.MoveDocument(document.FilePath);
+            }
+        }
     }
 }

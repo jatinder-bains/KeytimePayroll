@@ -18,6 +18,8 @@ namespace BainsTech.DocMailer.Components
             this.logger = logger;
         }
 
+
+
         public IEnumerable<Document> GetDocumentsByExtension(string folderPath, string extension)
         {
             if (string.IsNullOrEmpty(folderPath)) throw new ArgumentNullException(nameof(folderPath));
@@ -64,6 +66,19 @@ namespace BainsTech.DocMailer.Components
             string month;
 
             return string.IsNullOrEmpty(ExtractFileNameComponents(fileName, out companyName, out type, out month));
+        }
+
+        public void MoveDocument(string documentFilePath)
+        {
+            var sentDir = Path.GetDirectoryName(documentFilePath) + @"\Sent";
+            if (!Directory.Exists(sentDir))
+            {
+                Directory.CreateDirectory(sentDir);
+            }
+
+            var destFileName = sentDir + @"\" + Path.GetFileName(documentFilePath);
+            File.Move(documentFilePath, destFileName);
+
         }
 
         public string ExtractFileNameComponents(string fileName, out string companyName, out string type,

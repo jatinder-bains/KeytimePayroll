@@ -56,6 +56,21 @@ namespace BainsTech.DocMailer.ViewModels
             }
         }
 
+        private bool haveDocsToSend;
+        public bool HaveDocsToSend
+        {
+            get { return haveDocsToSend; }
+            set
+            {
+                if (value == haveDocsToSend)
+                {
+                    return;
+                }
+                haveDocsToSend = value;
+                OnPropertyChanged();
+            }
+        }
+
         private int readyToSendDocCount;
         public int ReadyToSendCount
         {
@@ -68,6 +83,7 @@ namespace BainsTech.DocMailer.ViewModels
                 }
                 readyToSendDocCount = value;
                 OnPropertyChanged();
+                HaveDocsToSend = readyToSendDocCount > 0;
             }
         }
         
@@ -116,6 +132,20 @@ namespace BainsTech.DocMailer.ViewModels
             }
         }
 
+        private string statusText;
+        public string StatusText
+        {
+            get { return statusText; }
+            set
+            {
+                if (value == statusText)
+                {
+                    return;
+                }
+                statusText = value;
+                OnPropertyChanged();
+            }
+        }
 
 
         public void CreateRefreshDocumentsListCommand()
@@ -144,17 +174,21 @@ namespace BainsTech.DocMailer.ViewModels
 
         private void RefreshCounts()
         {
+            StatusText = "";
             TotalDocCount = Documents.Count;
             ReadyToSendCount = Documents.Count(d => d.Status == DocumentStatus.ReadyToSend || d.Status == DocumentStatus.SendFailed );
             CantSendCount = Documents.Count(d => d.Status == DocumentStatus.IncompatibleFileName ||
                                                  d.Status == DocumentStatus.NoMappedEmail);
             SentCount = Documents.Count(d => d.Status == DocumentStatus.Sent);
             SendFailedCount = Documents.Count(d => d.Status == DocumentStatus.SendFailed);
+            StatusText = "";
         }
 
         public void MailDocuments(object val)
         {
+            StatusText = "Sending - please wait...";
             documentMailer.EmailDocuments(this.Documents.Where(d => d.IsReadyToSend));
+            StatusText = "Done";
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

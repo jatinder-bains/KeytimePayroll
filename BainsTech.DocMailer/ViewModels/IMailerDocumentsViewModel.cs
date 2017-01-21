@@ -11,5 +11,7 @@ namespace BainsTech.DocMailer.ViewModels
         int CantSendCount { get; set; }
         int SentCount { get; set; }
         int SendFailedCount { get; set; }
+        string StatusText { get; set; }
+        bool HaveDocsToSend { get; set; }
     }
 }
