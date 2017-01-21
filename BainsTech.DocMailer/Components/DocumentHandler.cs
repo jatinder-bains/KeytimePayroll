@@ -111,14 +111,10 @@ namespace BainsTech.DocMailer.Components
 
             if (docHasCompatibleFileName && docHasMappedEmail)
             {
-                document.IsReadyToSend = true;
                 document.Status = DocumentStatus.ReadyToSend;
-                
                 return;
             }
-
-            document.IsReadyToSend = false;
-
+            
             if (!docHasCompatibleFileName)
             {
                 document.Status = DocumentStatus.IncompatibleFileName;

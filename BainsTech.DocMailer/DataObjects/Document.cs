@@ -10,6 +10,7 @@ namespace BainsTech.DocMailer.DataObjects
         ReadyToSend,
         IncompatibleFileName,
         NoMappedEmail,
+        Sending,
         Sent,
         SendFailed
     }
@@ -18,8 +19,7 @@ namespace BainsTech.DocMailer.DataObjects
     {
         private string emailAddress;
         private string statusDesc;
-        private bool isReadyToSend;
-
+        
         public string FilePath { get; set; }
 
         public string FileName { get; set; }
@@ -35,16 +35,7 @@ namespace BainsTech.DocMailer.DataObjects
             }
         }
 
-        public bool IsReadyToSend
-        {
-            get { return isReadyToSend; }
-            set
-            {
-                if (isReadyToSend == value) return;
-                isReadyToSend = value;
-                OnPropertyChanged();
-            }
-        }
+        public bool IsReadyToSend => Status == DocumentStatus.ReadyToSend || Status == DocumentStatus.SendFailed;
 
         private DocumentStatus status;
         public DocumentStatus Status
@@ -57,7 +48,8 @@ namespace BainsTech.DocMailer.DataObjects
                     status = value;
                     OnPropertyChanged();
                 }
-                StatusDesc = status.ToDisplayString();}
+                StatusDesc = status.ToDisplayString();
+            }
         }
         
         public string StatusDesc

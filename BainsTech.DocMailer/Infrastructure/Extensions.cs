@@ -33,6 +33,12 @@ namespace BainsTech.DocMailer.Infrastructure
                     return "Incompatible file name";
                 case DocumentStatus.NoMappedEmail:
                     return "No mapped email";
+                case DocumentStatus.Sending:
+                    return "Sending...";
+                case DocumentStatus.Sent:
+                    return "Sent";
+                case DocumentStatus.SendFailed:
+                    return "Send failed";
                 default:
                     return "Unknown ?";
             }

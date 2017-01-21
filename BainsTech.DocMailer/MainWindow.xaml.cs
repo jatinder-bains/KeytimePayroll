@@ -9,6 +9,8 @@ using Autofac;
 using BainsTech.DocMailer.Components;
 using BainsTech.DocMailer.ViewModels;
 using System.Security.Cryptography;
+using BainsTech.DocMailer.Adapters;
+using BainsTech.DocMailer.Factories;
 using BainsTech.DocMailer.Infrastructure;
 
 namespace BainsTech.DocMailer
@@ -36,6 +38,8 @@ namespace BainsTech.DocMailer
             builder.RegisterType<PasswordConfigViewModel>().As<IPasswordConfigViewModel>();
             builder.RegisterType<DocumentMailer>().As<IDocumentMailer>();
             builder.RegisterType<Logger>().As<ILogger>().SingleInstance();
+            //builder.RegisterType<MailMessageAdapter>().As<IMailMessageAdapter>().SingleInstance();
+            builder.RegisterType<MailMessageAdapterFactory>().As<IMailMessageAdapterFactory>().SingleInstance();
             
             Container = builder.Build();
 

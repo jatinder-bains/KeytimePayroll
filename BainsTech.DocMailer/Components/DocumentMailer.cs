@@ -5,8 +5,10 @@ using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using BainsTech.DocMailer.Adapters;
 using BainsTech.DocMailer.DataObjects;
 using BainsTech.DocMailer.Exceptions;
+using BainsTech.DocMailer.Factories;
 using BainsTech.DocMailer.Infrastructure;
 
 // http://www.serversmtp.com/en/smtp-yahoo
@@ -18,14 +20,21 @@ namespace BainsTech.DocMailer.Components
     {
         private readonly IConfigurationSettings configurationSettings;
         private readonly IDocumentHandler documentHandler;
+        private readonly IMailMessageAdapterFactory mailMessageAdapterFactory;
+
             
         private readonly ILogger logger;
 
-        public DocumentMailer(IConfigurationSettings configurationSettings, ILogger logger, IDocumentHandler documentHandler)
+        public DocumentMailer(
+            IConfigurationSettings configurationSettings, 
+            ILogger logger, 
+            IDocumentHandler documentHandler, 
+            IMailMessageAdapterFactory mailMessageAdapterFactory)
         {
             this.configurationSettings = configurationSettings;
             this.logger = logger;
             this.documentHandler = documentHandler;
+            this.mailMessageAdapterFactory = mailMessageAdapterFactory;
         }
 
         public string EmailDocuments(IEnumerable<Document> documents)
@@ -55,28 +64,32 @@ namespace BainsTech.DocMailer.Components
                 var enableSsl = configurationSettings.EnableSsl;
 
                 var senderEmailAddress = configurationSettings.SenderEmailAddress;
-                var senderEmailAccountPasword = configurationSettings.SenderEmailAccountPassword.Decrypt();
+                var senderEmailAccountPasword = configurationSettings.SenderEmailAccountPassword;
                 var recipientEmailAddress = document.EmailAddress;
                 var subject = SubjectFromFileName(document.FileName);
                 var body = "Email body TBC - " + document.FileName;
 
-                using (var mailMessage = new MailMessage())
+                using (var mailMessage = mailMessageAdapterFactory.CreateMailMessageAdapter())
                 {
 
-                    mailMessage.From = new MailAddress(senderEmailAddress);
-                    mailMessage.To.Add(recipientEmailAddress);
-                    mailMessage.Bcc.Add(senderEmailAddress);
+                    mailMessage.SetFromAddress(senderEmailAddress);
+                    mailMessage.AddToAdress(recipientEmailAddress);
+                    mailMessage.AddBccAddress(senderEmailAddress);
+                    mailMessage.AddAttachment(document.FilePath);
                     mailMessage.Subject = subject;
                     mailMessage.Body = body;
                     mailMessage.IsBodyHtml = true;
 
-                    mailMessage.Attachments.Add(new Attachment(document.FilePath));
+                    mailMessage.AddAttachment(document.FilePath);
 
-                    using (var smtpClient = new SmtpClient(smtpAddress, portNumber))
+                    using (var smtpClient = mailMessageAdapterFactory.CreateSmtpClientAdapter(smtpAddress, portNumber))
                     {
-                        smtpClient.Credentials = new NetworkCredential(senderEmailAddress, senderEmailAccountPasword);
-                        smtpClient.EnableSsl = enableSsl;
-                        logger.Info("Sending " + document.FilePath + "...");
+                        smtpClient.SetCredentials(senderEmailAddress, senderEmailAccountPasword);
+
+                        smtpClient.EnableSssl = enableSsl;
+                        
+                        document.StatusDesc = "Sending KKK...";
+                        document.Status = DocumentStatus.Sending;
                         smtpClient.Send(mailMessage);
                         document.Status = DocumentStatus.Sent;
                     }
