@@ -1,13 +1,23 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using BainsTech.DocMailer.Infrastructure;
 using BainsTech.DocMailer.Properties;
 
 namespace BainsTech.DocMailer.DataObjects
 {
+    public enum DocumentStatus
+    {
+        ReadyToSend,
+        IncompatibleFileName,
+        NoMappedEmail,
+        Sent,
+        SendFailed
+    }
+
     public class Document : INotifyPropertyChanged
     {
         private string emailAddress;
-        private string status;
+        private string statusDesc;
         private bool isReadyToSend;
 
         public string FilePath { get; set; }
@@ -36,13 +46,27 @@ namespace BainsTech.DocMailer.DataObjects
             }
         }
 
-        public string Status
+        private DocumentStatus status;
+        public DocumentStatus Status
         {
             get { return status; }
             set
             {
-                if (status == value) return;
-                status = value;
+                if (status != value)
+                {
+                    status = value;
+                    OnPropertyChanged();
+                }
+                StatusDesc = status.ToDisplayString();}
+        }
+        
+        public string StatusDesc
+        {
+            get { return statusDesc; }
+            set
+            {
+                if (statusDesc == value) return;
+                statusDesc = value;
                 OnPropertyChanged();
             }
         }

@@ -78,15 +78,15 @@ namespace BainsTech.DocMailer.Components
                         smtpClient.EnableSsl = enableSsl;
                         logger.Info("Sending " + document.FilePath + "...");
                         smtpClient.Send(mailMessage);
-                        logger.Info("IsReadyToSend " + document.FilePath);
-                        document.Status = "IsReadyToSend";
+                        document.Status = DocumentStatus.Sent;
                     }
                 }
             }
             catch (Exception ex)
-                {
-                    document.Status = "Error:" + ex.Message;
-                }
+            {
+                document.Status = DocumentStatus.SendFailed;
+                document.StatusDesc = "Error:" + ex.Message;
+            }
         }
 
     }

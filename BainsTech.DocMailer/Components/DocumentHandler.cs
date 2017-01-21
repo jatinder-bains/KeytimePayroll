@@ -33,16 +33,18 @@ namespace BainsTech.DocMailer.Components
                 {
                     var fileName = Path.GetFileName(file);
                     var companyNameKey = fileName?.Split(' ').First();
+                    var emailAddress = companyNameKey != null
+                        ? configurationSettings.GetEmailForCompany(companyNameKey)
+                        : "??";
 
                     var doc = new Document
                     {
                         FilePath = file,
                         FileName = fileName,
-                        EmailAddress =
-                            companyNameKey != null ? configurationSettings.GetEmailForCompany(companyNameKey) : "??"
+                        EmailAddress = emailAddress,
                     };
 
-                    SetDocumentStatus(doc);
+                    SetDocumentStatus(doc, emailAddress);
                     docs.Add(doc);
                 }
             }
@@ -94,25 +96,39 @@ namespace BainsTech.DocMailer.Components
                 return errMsg + $"Invalid date '{dateString}'";
 
             month = months[date.Month - 1];
-            return string.Empty; // no errors;
+            return null; // no errors;
         }
 
-        private void SetDocumentStatus(Document document)
+        private void SetDocumentStatus(Document document, string emailAddress)
         {
             string companyName;
             string type;
             string month;
 
-            var invaidFileNameError = ExtractFileNameComponents(document.FileName, out companyName, out type, out month);
-            if (string.IsNullOrEmpty(invaidFileNameError))
+            var incompatibleFileNameError = ExtractFileNameComponents(document.FileName, out companyName, out type, out month);
+            var docHasCompatibleFileName = string.IsNullOrEmpty(incompatibleFileNameError);
+            var docHasMappedEmail = !string.IsNullOrEmpty(emailAddress);
+
+            if (docHasCompatibleFileName && docHasMappedEmail)
             {
                 document.IsReadyToSend = true;
-                document.Status = "Ready to send";
+                document.Status = DocumentStatus.ReadyToSend;
+                
                 return;
             }
 
             document.IsReadyToSend = false;
-            document.Status = invaidFileNameError;
+
+            if (!docHasCompatibleFileName)
+            {
+                document.Status = DocumentStatus.IncompatibleFileName;
+                document.StatusDesc = incompatibleFileNameError;
+            }
+
+            if (!docHasMappedEmail)
+            {
+                document.Status = DocumentStatus.NoMappedEmail;
+            }
         }
     }
 }

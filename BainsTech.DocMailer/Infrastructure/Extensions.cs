@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 using System.Text;
+using BainsTech.DocMailer.DataObjects;
 
 namespace BainsTech.DocMailer.Infrastructure
 {
@@ -19,6 +20,22 @@ namespace BainsTech.DocMailer.Infrastructure
             return Encoding.Unicode.GetString(
                 ProtectedData.Unprotect(
                     Convert.FromBase64String(text), null, DataProtectionScope.LocalMachine));
+        }
+
+
+        public static string ToDisplayString(this DocumentStatus documentStatus)
+        {
+            switch (documentStatus)
+            {
+                case DocumentStatus.ReadyToSend:
+                    return "Ready to send";
+                case DocumentStatus.IncompatibleFileName:
+                    return "Incompatible file name";
+                case DocumentStatus.NoMappedEmail:
+                    return "No mapped email";
+                default:
+                    return "Unknown ?";
+            }
         }
     }
 }
