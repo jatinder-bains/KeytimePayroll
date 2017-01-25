@@ -1,9 +1,10 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using BainsTech.DocMailer.DataObjects;
 
 namespace BainsTech.DocMailer.ViewModels
 {
-    internal interface IMailerDocumentsViewModel
+    internal interface IMailerDocumentsViewModel : INotifyPropertyChanged
     {
         ObservableCollection<Document> Documents { get; set; }
         int TotalDocCount { get; set; }

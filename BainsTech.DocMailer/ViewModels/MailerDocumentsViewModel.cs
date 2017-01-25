@@ -4,7 +4,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using BainsTech.DocMailer.Components;
 using BainsTech.DocMailer.DataObjects;
 using BainsTech.DocMailer.Infrastructure;
@@ -15,7 +17,7 @@ using BainsTech.DocMailer.Infrastructure;
 
 namespace BainsTech.DocMailer.ViewModels
 {
-    internal class MailerDocumentsViewModel : IMailerDocumentsViewModel, INotifyPropertyChanged
+    internal class MailerDocumentsViewModel : IMailerDocumentsViewModel
     {
         private readonly IConfigurationSettings configurationSettings;
         private readonly IDocumentHandler documentHandler;
@@ -34,6 +36,8 @@ namespace BainsTech.DocMailer.ViewModels
             TotalDocCount = Documents.Count;
 
             CreateRefreshDocumentsListCommand();
+
+            RefreshDocumentsList(null);
         }
 
         public ICommand RefreshDocumentsListCommand { get; set; }
@@ -147,6 +151,22 @@ namespace BainsTech.DocMailer.ViewModels
             }
         }
 
+        private bool sending;
+        public bool Sending
+        {
+            get { return sending; }
+            set
+            {
+                if (value == sending)
+                {
+                    return;
+                }
+                sending = value;
+                OnPropertyChanged();
+            }
+        }
+
+
 
         public void CreateRefreshDocumentsListCommand()
         {
@@ -186,9 +206,17 @@ namespace BainsTech.DocMailer.ViewModels
 
         public void MailDocuments(object val)
         {
-            StatusText = "Sending - please wait...";
-            documentMailer.EmailDocuments(this.Documents.Where(d => d.IsReadyToSend));
-            StatusText = "Done";
+            Task.Run(() =>
+            {
+                StatusText = "Sending - please wait...";
+                Sending = true;
+                ReadyToSendCount = 0;
+                documentMailer.EmailDocuments(this.Documents.Where(d => d.IsReadyToSend));
+                StatusText = "Sent";
+                Sending = false;
+                RefreshCounts();
+            });
+
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -196,7 +224,6 @@ namespace BainsTech.DocMailer.ViewModels
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
         }
     }
 }

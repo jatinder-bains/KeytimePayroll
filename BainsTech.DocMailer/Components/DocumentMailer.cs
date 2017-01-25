@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 using BainsTech.DocMailer.DataObjects;
 using BainsTech.DocMailer.Factories;
 
@@ -79,10 +83,15 @@ namespace BainsTech.DocMailer.Components
                         smtpClient.SetCredentials(senderEmailAddress, senderEmailAccountPasword);
 
                         smtpClient.EnableSssl = enableSsl;
-
+                        
                         document.Status = DocumentStatus.Sending;
+                        
+                        logger.Info("Sending {0} to {1}...", document.FileName, recipientEmailAddress);
                         smtpClient.Send(mailMessage);
+                        
                         document.Status = DocumentStatus.Sent;
+
+                        logger.Info("Sent {0}", document.FileName);
                     }
                 }
             }
@@ -95,7 +104,7 @@ namespace BainsTech.DocMailer.Components
             finally
             {
                 if (document.Status == DocumentStatus.Sent)
-                    documentHandler.MoveDocument(document.FilePath);
+                   documentHandler.MoveDocument(document.FilePath);
             }
         }
     }
