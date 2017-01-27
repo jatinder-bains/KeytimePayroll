@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using Autofac.Util;
 using BainsTech.DocMailer.DataObjects;
 
 namespace BainsTech.DocMailer.Components
@@ -68,16 +70,63 @@ namespace BainsTech.DocMailer.Components
             return string.IsNullOrEmpty(ExtractFileNameComponents(fileName, out companyName, out type, out month));
         }
 
-        public void MoveDocument(string documentFilePath)
+        public bool MoveDocument(string documentFilePath)
+        {
+            logger.Trace("Moving file " + documentFilePath);
+            var moved = false;
+
+            var sentDir = EnsureSentItemsDirectory(documentFilePath);1
+            if (string.IsNullOrEmpty(sentDir))
+            {
+                return false;
+            }
+
+            var destFileName = sentDir + @"\" + Path.GetFileName(documentFilePath);
+            var remainingRetries = 5;
+            while (remainingRetries-- != 0)
+            {
+                try
+                {
+                    File.Move(documentFilePath, destFileName);
+                    moved = true;
+                }
+                catch(Exception ex)
+                {
+                    var errMsg = $"Error moving document:{documentFilePath}, remainingRetries:{remainingRetries}";
+
+                    logger.Error(ex, errMsg);
+                    if (remainingRetries > 0)
+                    {
+                        Task.Delay(1000).Wait();
+                    }
+                    else
+                    {
+                        moved = false;
+                    }
+                }
+            }
+            return moved;
+        }
+
+        private string EnsureSentItemsDirectory(string documentFilePath)
         {
             var sentDir = Path.GetDirectoryName(documentFilePath) + @"\Sent";
             if (!Directory.Exists(sentDir))
             {
-                Directory.CreateDirectory(sentDir);
+                logger.Trace("Creating directory " + documentFilePath);
+                try
+                {
+                    Directory.CreateDirectory(sentDir);
+                    return sentDir;
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, "Error creating sent directory:");
+                    return null;
+                }
             }
 
-            var destFileName = sentDir + @"\" + Path.GetFileName(documentFilePath);
-            File.Move(documentFilePath, destFileName);
+            return null;
 
         }
 

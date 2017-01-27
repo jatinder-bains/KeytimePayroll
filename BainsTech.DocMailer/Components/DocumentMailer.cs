@@ -71,7 +71,6 @@ namespace BainsTech.DocMailer.Components
                     mailMessage.SetFromAddress(senderEmailAddress);
                     mailMessage.AddToAdress(recipientEmailAddress);
                     mailMessage.AddBccAddress(senderEmailAddress);
-                    mailMessage.AddAttachment(document.FilePath);
                     mailMessage.Subject = subject;
                     mailMessage.Body = body;
                     mailMessage.IsBodyHtml = true;
@@ -104,7 +103,13 @@ namespace BainsTech.DocMailer.Components
             finally
             {
                 if (document.Status == DocumentStatus.Sent)
-                   documentHandler.MoveDocument(document.FilePath);
+                {
+                    var moved = documentHandler.MoveDocument(document.FilePath);
+                    if (!moved)
+                    {
+                        document.StatusDesc = "Failed to move document";
+                    }
+                }
             }
         }
     }
