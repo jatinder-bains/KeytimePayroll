@@ -39,6 +39,8 @@ namespace BainsTech.DocMailer.Infrastructure
                     return "Sent";
                 case DocumentStatus.SendFailed:
                     return "Send failed";
+                case DocumentStatus.SentDocMoveFailed:
+                    return "Sent, but document move failed";
                 default:
                     return "Unknown ?";
             }

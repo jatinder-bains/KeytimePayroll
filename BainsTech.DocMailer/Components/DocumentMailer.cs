@@ -34,11 +34,9 @@ namespace BainsTech.DocMailer.Components
             this.mailMessageAdapterFactory = mailMessageAdapterFactory;
         }
 
-        public string EmailDocuments(IEnumerable<Document> documents)
+        public void EmailDocuments(IEnumerable<Document> documents)
         {
             Parallel.ForEach(documents, EmailDocument);
-
-            return "";
         }
 
         private string SubjectFromFileName(string fileName)
@@ -87,6 +85,7 @@ namespace BainsTech.DocMailer.Components
                         
                         logger.Info("Sending {0} to {1}...", document.FileName, recipientEmailAddress);
                         smtpClient.Send(mailMessage);
+                        //Task.Delay(2000).Wait();
                         
                         document.Status = DocumentStatus.Sent;
 
@@ -107,7 +106,7 @@ namespace BainsTech.DocMailer.Components
                     var moved = documentHandler.MoveDocument(document.FilePath);
                     if (!moved)
                     {
-                        document.StatusDesc = "Failed to move document";
+                        document.Status = DocumentStatus.SentDocMoveFailed;
                     }
                 }
             }

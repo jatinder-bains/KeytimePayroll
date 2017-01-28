@@ -40,6 +40,7 @@ namespace BainsTech.DocMailer
             builder.RegisterType<Logger>().As<ILogger>().SingleInstance();
             //builder.RegisterType<MailMessageAdapter>().As<IMailMessageAdapter>().SingleInstance();
             builder.RegisterType<MailMessageAdapterFactory>().As<IMailMessageAdapterFactory>().SingleInstance();
+            builder.RegisterType<FileSystemAdapter>().As<IFileSystemAdapter>().SingleInstance();
             
             Container = builder.Build();
 

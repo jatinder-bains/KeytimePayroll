@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Autofac.Util;
+using BainsTech.DocMailer.Adapters;
 using BainsTech.DocMailer.DataObjects;
 
 namespace BainsTech.DocMailer.Components
@@ -13,14 +14,17 @@ namespace BainsTech.DocMailer.Components
     {
         private readonly IConfigurationSettings configurationSettings;
         private readonly ILogger logger;
+        private readonly IFileSystemAdapter fileSystemAdapter;
 
-        public DocumentHandler(IConfigurationSettings configurationSettings, ILogger logger)
+        public DocumentHandler(
+            ILogger logger,
+            IConfigurationSettings configurationSettings,
+            IFileSystemAdapter fileSystemAdapter)
         {
             this.configurationSettings = configurationSettings;
             this.logger = logger;
+            this.fileSystemAdapter = fileSystemAdapter;
         }
-
-
 
         public IEnumerable<Document> GetDocumentsByExtension(string folderPath, string extension)
         {
@@ -31,11 +35,11 @@ namespace BainsTech.DocMailer.Components
 
             try
             {
-                var files = Directory.GetFiles(folderPath, "*." + extension);
+                var files = fileSystemAdapter.GetFiles(folderPath, extension);
 
                 foreach (var file in files)
                 {
-                    var fileName = Path.GetFileName(file);
+                    var fileName = fileSystemAdapter.GetFileName(file);
                     var companyNameKey = fileName?.Split(' ').First();
                     var emailAddress = companyNameKey != null
                         ? configurationSettings.GetEmailForCompany(companyNameKey)
@@ -75,7 +79,7 @@ namespace BainsTech.DocMailer.Components
             logger.Trace("Moving file " + documentFilePath);
             var moved = false;
 
-            var sentDir = EnsureSentItemsDirectory(documentFilePath);1
+            var sentDir = EnsureSentItemsDirectory(documentFilePath);
             if (string.IsNullOrEmpty(sentDir))
             {
                 return false;
@@ -87,8 +91,8 @@ namespace BainsTech.DocMailer.Components
             {
                 try
                 {
-                    File.Move(documentFilePath, destFileName);
-                    moved = true;
+                    fileSystemAdapter.Move(documentFilePath, destFileName);
+                    return true;
                 }
                 catch(Exception ex)
                 {
@@ -101,33 +105,32 @@ namespace BainsTech.DocMailer.Components
                     }
                     else
                     {
-                        moved = false;
+                        return false;
                     }
                 }
             }
-            return moved;
+            return false;
         }
 
         private string EnsureSentItemsDirectory(string documentFilePath)
         {
-            var sentDir = Path.GetDirectoryName(documentFilePath) + @"\Sent";
-            if (!Directory.Exists(sentDir))
+            var sentDir = fileSystemAdapter.GetDirectoryName(documentFilePath) + @"\Sent";
+            if (fileSystemAdapter.Exists(sentDir))
             {
-                logger.Trace("Creating directory " + documentFilePath);
-                try
-                {
-                    Directory.CreateDirectory(sentDir);
-                    return sentDir;
-                }
-                catch (Exception ex)
-                {
-                    logger.Error(ex, "Error creating sent directory:");
-                    return null;
-                }
+                return sentDir;
             }
 
-            return null;
-
+            logger.Trace("Creating directory " + documentFilePath);
+            try
+            {
+                fileSystemAdapter.CreateDirectory(sentDir);
+                return sentDir;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Error creating sent directory:");
+                return null;
+            }
         }
 
         public string ExtractFileNameComponents(string fileName, out string companyName, out string type,
@@ -151,7 +154,7 @@ namespace BainsTech.DocMailer.Components
                 string.Compare(type, "PAYROLL", StringComparison.OrdinalIgnoreCase) != 0)
                 return errMsg + $"Invalid type '{type}'";
 
-            var dateString = Path.GetFileNameWithoutExtension(elems[2]);
+            var dateString = fileSystemAdapter.GetFileNameWithoutExtension(elems[2]);
 
             DateTime date;
             if (

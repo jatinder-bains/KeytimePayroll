@@ -5,6 +5,6 @@ namespace BainsTech.DocMailer.Components
 {
     internal interface IDocumentMailer
     {
-        string EmailDocuments(IEnumerable<Document> documents);
+        void EmailDocuments(IEnumerable<Document> documents);
     }
 }

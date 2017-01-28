@@ -53,3 +53,5 @@ using System.Windows;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: InternalsVisibleTo("BainsTech.DocMailer.UnitTests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")] //attribute, because assembly BainsTech.DocMailer is not strong-named.

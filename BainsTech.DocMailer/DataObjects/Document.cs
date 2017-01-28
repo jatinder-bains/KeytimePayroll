@@ -12,7 +12,8 @@ namespace BainsTech.DocMailer.DataObjects
         NoMappedEmail,
         Sending,
         Sent,
-        SendFailed
+        SendFailed,
+        SentDocMoveFailed
     }
 
     public class Document : INotifyPropertyChanged
