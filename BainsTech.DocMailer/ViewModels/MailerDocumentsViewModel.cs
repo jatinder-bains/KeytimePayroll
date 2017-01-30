@@ -179,11 +179,11 @@ namespace BainsTech.DocMailer.ViewModels
             logger.Info("MailerDocumentsViewModel.RefreshDocumentsList() - ENTER");
             Documents.Clear();
 
-            var documents = documentHandler.GetDocumentsByExtension(
-                configurationSettings.DocumentsLocation, configurationSettings.DocumentExtension).ToArray();
+            var documents = documentHandler.GetDocuments(
+                configurationSettings.DocumentsLocation, configurationSettings.DocumentExtension).OrderBy(d => d.EmailAddress).ToArray();
 
             logger.Info("Adding {0} documents",  documents.Count());
-
+            
             foreach (var document in documents)
                 Documents.Add(document);
 

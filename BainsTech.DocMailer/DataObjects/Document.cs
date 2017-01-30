@@ -16,6 +16,13 @@ namespace BainsTech.DocMailer.DataObjects
         SentDocMoveFailed
     }
 
+    public enum DocumentType
+    {
+        Unknown,
+        Payroll,
+        Paye,
+    }
+
     public class Document : INotifyPropertyChanged
     {
         private string emailAddress;
@@ -52,7 +59,9 @@ namespace BainsTech.DocMailer.DataObjects
                 StatusDesc = status.ToDisplayString();
             }
         }
-        
+
+        public DocumentType DocumentType { get; set; }
+
         public string StatusDesc
         {
             get { return statusDesc; }

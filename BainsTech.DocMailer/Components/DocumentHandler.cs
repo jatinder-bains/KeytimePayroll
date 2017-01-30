@@ -26,7 +26,7 @@ namespace BainsTech.DocMailer.Components
             this.fileSystemAdapter = fileSystemAdapter;
         }
 
-        public IEnumerable<Document> GetDocumentsByExtension(string folderPath, string extension)
+        public IEnumerable<Document> GetDocuments(string folderPath, string extension)
         {
             if (string.IsNullOrEmpty(folderPath)) throw new ArgumentNullException(nameof(folderPath));
             if (string.IsNullOrEmpty(extension)) throw new ArgumentNullException(nameof(extension));
@@ -39,7 +39,7 @@ namespace BainsTech.DocMailer.Components
 
                 foreach (var file in files)
                 {
-                    var fileName = fileSystemAdapter.GetFileName(file);
+                    var fileName = Path.GetFileName(file);
                     var companyNameKey = fileName?.Split(' ').First();
                     var emailAddress = companyNameKey != null
                         ? configurationSettings.GetEmailForCompany(companyNameKey)
@@ -59,7 +59,7 @@ namespace BainsTech.DocMailer.Components
             catch (Exception ex)
             {
                 // TODO: Show errors in status bar via ErrorViewModel...
-                logger.Error(ex, "GetDocumentsByExtension() encountered exception");
+                logger.Error(ex, "GetDocuments() encountered exception");
             }
 
             return docs;
@@ -68,7 +68,7 @@ namespace BainsTech.DocMailer.Components
         public bool IsValidFileName(string fileName)
         {
             string companyName;
-            string type;
+            DocumentType type;
             string month;
 
             return string.IsNullOrEmpty(ExtractFileNameComponents(fileName, out companyName, out type, out month));
@@ -114,7 +114,7 @@ namespace BainsTech.DocMailer.Components
 
         private string EnsureSentItemsDirectory(string documentFilePath)
         {
-            var sentDir = fileSystemAdapter.GetDirectoryName(documentFilePath) + @"\Sent";
+            var sentDir = Path.GetDirectoryName(documentFilePath) + @"\Sent";
             if (fileSystemAdapter.Exists(sentDir))
             {
                 return sentDir;
@@ -133,28 +133,31 @@ namespace BainsTech.DocMailer.Components
             }
         }
 
-        public string ExtractFileNameComponents(string fileName, out string companyName, out string type,
+        public string ExtractFileNameComponents(string fileName, out string companyName, out DocumentType documentType,
             out string month)
         {
             var errMsg = $"Invalid file name is not in suported format 'CompanyName Paye/Payroll dd-mm-yy'.";
             string[] months =
             {
-                "January", "February", "March", "April", "May", "June", "July", "August", "September",
-                "October", "November", "December"
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
             };
 
-            companyName = type = month = string.Empty;
-            // <CompanyName> Payslips dd-mm-16.pdf
+            companyName = month = string.Empty;
+            documentType = DocumentType.Unknown;
+            
             var elems = fileName.Split(' ');
             if (elems.Length != 3)
                 return errMsg;
             companyName = elems[0];
-            type = elems[1];
-            if (string.Compare(type, "PAYE", StringComparison.OrdinalIgnoreCase) != 0 &&
-                string.Compare(type, "PAYROLL", StringComparison.OrdinalIgnoreCase) != 0)
+            var type = elems[1];
+            if (string.Compare(type, DocumentType.Paye.ToString(), StringComparison.OrdinalIgnoreCase) != 0 &&
+                string.Compare(type, DocumentType.Paye.ToString(), StringComparison.OrdinalIgnoreCase) != 0)
                 return errMsg + $"Invalid type '{type}'";
 
-            var dateString = fileSystemAdapter.GetFileNameWithoutExtension(elems[2]);
+            documentType = (DocumentType)Enum.Parse(typeof(DocumentType), type);
+
+            var dateString = Path.GetFileNameWithoutExtension(elems[2]);
 
             DateTime date;
             if (
@@ -169,12 +172,14 @@ namespace BainsTech.DocMailer.Components
         private void SetDocumentStatus(Document document, string emailAddress)
         {
             string companyName;
-            string type;
+            DocumentType type;
             string month;
 
             var incompatibleFileNameError = ExtractFileNameComponents(document.FileName, out companyName, out type, out month);
             var docHasCompatibleFileName = string.IsNullOrEmpty(incompatibleFileNameError);
             var docHasMappedEmail = !string.IsNullOrEmpty(emailAddress);
+
+            document.DocumentType = type;
 
             if (docHasCompatibleFileName && docHasMappedEmail)
             {

@@ -12,6 +12,7 @@ namespace BainsTech.DocMailer.Adapters
         string Body { get; set; }
         bool IsBodyHtml { get; set; }
         void AddAttachment(string documentFilePath);
+        void AddAttachments(string[] documentFilePaths);
         MailMessage MailMessage { get; }
     }
 }

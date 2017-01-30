@@ -36,6 +36,14 @@ namespace BainsTech.DocMailer.Adapters
             MailMessage.Attachments.Add(new Attachment(documentFilePath));
         }
 
+        public void AddAttachments(string[] documentFilePaths)
+        {
+            foreach (var documentFilePath in documentFilePaths)
+            {
+                MailMessage.Attachments.Add(new Attachment(documentFilePath));
+            }
+        }
+
         public void Dispose()
         {
             MailMessage?.Dispose();

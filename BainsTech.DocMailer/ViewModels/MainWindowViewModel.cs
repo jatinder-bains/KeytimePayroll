@@ -40,8 +40,6 @@ namespace BainsTech.DocMailer.ViewModels
 
         private void Initialise()
         {
-            var c = documentHandler.GetDocumentsByExtension(@"C:\tmp\PAYE", "pdf");
-            StartImportText = "Start Mailing " + c.Count();
             DocumentsLocation = configurationSettings.DocumentsLocation;
             DocumentExtension = configurationSettings.DocumentExtension;
             EmailAddress = !string.IsNullOrEmpty(configurationSettings.SenderEmailAddress)

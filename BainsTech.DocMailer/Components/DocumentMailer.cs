@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,8 +19,7 @@ namespace BainsTech.DocMailer.Components
     {
         private readonly IConfigurationSettings configurationSettings;
         private readonly IDocumentHandler documentHandler;
-
-
+        
         private readonly ILogger logger;
         private readonly IMailMessageAdapterFactory mailMessageAdapterFactory;
 
@@ -34,35 +35,40 @@ namespace BainsTech.DocMailer.Components
             this.mailMessageAdapterFactory = mailMessageAdapterFactory;
         }
 
-        public void EmailDocuments(IEnumerable<Document> documents)
+        public void EmailDocuments(IReadOnlyCollection<Document> documents)
         {
-            Parallel.ForEach(documents, EmailDocument);
+            var documentsGroupedByEmail = documents.GroupBy(d => d.EmailAddress).ToList();
+
+            Parallel.ForEach(documentsGroupedByEmail, (g) =>
+            {
+                EmailDocumentsForSameRecipient(g.ToList());
+
+            });
         }
 
-        private string SubjectFromFileName(string fileName)
+        private void EmailDocumentsForSameRecipient(IReadOnlyCollection<Document> documents)
         {
-            string companyName;
-            string type;
-            string month;
+            var documentsToSend = documents as Document[] ?? documents.ToArray();
+            var recipientEmailAddress = documentsToSend[0].EmailAddress;
 
-            var error = documentHandler.ExtractFileNameComponents(fileName, out companyName, out type, out month);
+            if (documents == null || !documentsToSend.Any()) throw new ArgumentException(@"Parameter is null or empty", nameof(documents));
+            if(documentsToSend.Any(d => string.Compare(d.EmailAddress, recipientEmailAddress, StringComparison.CurrentCultureIgnoreCase) != 0))
+                throw new ArgumentException(@"Not all documents are for email address {recipientEmailAddress}", nameof(documents));
 
-            return string.IsNullOrEmpty(error) ? $"{companyName} {type} {month}" : error;
-        }
+            var allSent = false;
 
-        private void EmailDocument(Document document)
-        {
             try
             {
+                
                 var smtpAddress = configurationSettings.SmtpAddress;
                 var portNumber = configurationSettings.PortNumber;
                 var enableSsl = configurationSettings.EnableSsl;
 
                 var senderEmailAddress = configurationSettings.SenderEmailAddress;
                 var senderEmailAccountPasword = configurationSettings.SenderEmailAccountPassword;
-                var recipientEmailAddress = document.EmailAddress;
-                var subject = SubjectFromFileName(document.FileName);
-                var body = "Email body TBC - " + document.FileName;
+                
+                var subject = BuildSubjectFromDocuments(documents);
+                var body = "Email body TBC" ;
 
                 using (var mailMessage = mailMessageAdapterFactory.CreateMailMessageAdapter())
                 {
@@ -73,43 +79,89 @@ namespace BainsTech.DocMailer.Components
                     mailMessage.Body = body;
                     mailMessage.IsBodyHtml = true;
 
-                    mailMessage.AddAttachment(document.FilePath);
+                    mailMessage.AddAttachments(documents.Select(d => d.FilePath).ToArray());
 
                     using (var smtpClient = mailMessageAdapterFactory.CreateSmtpClientAdapter(smtpAddress, portNumber))
                     {
                         smtpClient.SetCredentials(senderEmailAddress, senderEmailAccountPasword);
 
                         smtpClient.EnableSssl = enableSsl;
+
+                        foreach (var document in documents)
+                        {
+                            document.Status = DocumentStatus.Sending;
+                        }
                         
-                        document.Status = DocumentStatus.Sending;
-                        
-                        logger.Info("Sending {0} to {1}...", document.FileName, recipientEmailAddress);
+                        logger.Info($"Sending {documents.Count} to {recipientEmailAddress}...");
+
                         smtpClient.Send(mailMessage);
                         //Task.Delay(2000).Wait();
-                        
-                        document.Status = DocumentStatus.Sent;
 
-                        logger.Info("Sent {0}", document.FileName);
+                        foreach (var document in documents)
+                        {
+                            document.Status = DocumentStatus.Sent;
+                        }
+                        allSent = true;
+                        logger.Info($"Sent {documents.Count} to {recipientEmailAddress}.");
                     }
                 }
             }
             catch (Exception ex)
             {
-                document.Status = DocumentStatus.SendFailed;
-                document.StatusDesc = "Error:" + ex.Message;
+                foreach (var document in documents)
+                {
+                    document.Status = DocumentStatus.SendFailed;
+                    document.StatusDesc = "Error:" + ex.Message;
+                }
             }
 
             finally
             {
-                if (document.Status == DocumentStatus.Sent)
+                if (allSent)
                 {
-                    var moved = documentHandler.MoveDocument(document.FilePath);
-                    if (!moved)
+                    foreach (var document in documents)
                     {
-                        document.Status = DocumentStatus.SentDocMoveFailed;
+                        if (!documentHandler.MoveDocument(document.FilePath))
+                        {
+                            document.Status = DocumentStatus.SentDocMoveFailed;
+                        }
                     }
                 }
             }
         }
+
+        private string BuildSubjectFromFileName(string fileName)
+        {
+            string companyName;
+            string type;
+            string month;
+
+            var error = documentHandler.ExtractFileNameComponents(fileName, out companyName, out type, out month);
+
+            return string.IsNullOrEmpty(error) ? $"{companyName} {type} {month}" : error;
+        }
+
+        private string BuildSubjectFromDocuments(IReadOnlyCollection<Document> documents)
+        {
+            if (documents.Count == 0)
+            {
+                return BuildSubjectFromFileName(documents.First().FileName);
+            }
+            var countPayeDocs = documents.Count(d => d.DocumentType == DocumentType.Paye);
+            var countPayrollDocs = documents.Count(d => d.DocumentType == DocumentType.Payroll);
+
+            if (countPayeDocs == documents.Count)
+            {
+                return "PAYE documents";
+            }
+
+            if (countPayrollDocs == documents.Count)
+            {
+                return "Payroll documents";
+            }
+
+            return "Payroll and PAYE documents";
+        }
+
     }
 }
