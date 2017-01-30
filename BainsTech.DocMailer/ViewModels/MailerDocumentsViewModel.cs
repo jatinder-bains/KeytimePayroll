@@ -211,7 +211,7 @@ namespace BainsTech.DocMailer.ViewModels
                 StatusText = "Sending - please wait...";
                 Sending = true;
                 ReadyToSendCount = 0;
-                documentMailer.EmailDocuments(this.Documents.Where(d => d.IsReadyToSend));
+                documentMailer.EmailDocuments(this.Documents.Where(d => d.IsReadyToSend).ToList());
                 StatusText = "Sent";
                 Sending = false;
                 RefreshCounts();

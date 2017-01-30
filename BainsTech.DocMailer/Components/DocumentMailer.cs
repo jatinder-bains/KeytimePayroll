@@ -133,7 +133,7 @@ namespace BainsTech.DocMailer.Components
         private string BuildSubjectFromFileName(string fileName)
         {
             string companyName;
-            string type;
+            DocumentType type;
             string month;
 
             var error = documentHandler.ExtractFileNameComponents(fileName, out companyName, out type, out month);

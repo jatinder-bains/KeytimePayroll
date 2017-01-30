@@ -57,8 +57,50 @@ namespace BainsTech.DocMailer.UnitTests.Components
         }
 
         [Test]
-        public void ReturnDocument_When_GettingDocumentsByExtension_AnddAValidFolderNameAndExtensionIsSupplied()
+        [TestCase("Paye", "BainsTech", "31-12-16")]
+        public void ReturnFileNameComponents_WhenExtractFileNameComponents_FromAValidPayeFileName(string type, string companyName, string date)
         {
+            // Arrange
+            var fileName = $"{type} {companyName} {date}.pdf";
+            string extractedCompanyName;
+            DocumentType extractedDocType;
+            string extractedMonth;
+
+            // Act
+            var errorMessage = documentHandler.ExtractFileNameComponents(fileName, out extractedCompanyName, out extractedDocType, out extractedMonth);
+
+            // Assert
+            errorMessage.Should().BeNullOrEmpty();
+            extractedDocType.Should().Be(DocumentType.Paye);
+            //extractedMonth.Should().Be(date.Split('-').ToArray()[1]);
+        }
+
+        [Test]
+        [TestCase("Payroll", "BainsTech", "All", "31-12-16")]
+        [TestCase("Payroll", "BainsTech", "jsbainsNic", "30-06-16")]
+        [TestCase("Payroll", "BainsTech", "nkbainsNic", "30-06-16")]
+        public void ReturnFileNameComponents_WhenExtractFileNameComponents_FromAValidPayrollFileName(string type, string companyName, string employee, string date)
+        {
+            // Arrange
+            var fileName = $"{type} {companyName} {employee} {date}.pdf";
+            string extractedCompanyName;
+            DocumentType extractedDocType;
+            string extractedMonth;
+
+            // Act
+            var errorMessage = documentHandler.ExtractFileNameComponents(fileName, out extractedCompanyName, out extractedDocType, out extractedMonth);
+
+            // Assert
+            errorMessage.Should().BeNullOrEmpty();
+            extractedDocType.Should().Be(DocumentType.Payroll);
+            //extractedMonth.Should().Be(date.Split('-').ToArray()[1]);
+        }
+
+
+        [Test]
+        public void ReturnDocument_WhenGettingDocuments_AnddAValidFolderNameAndExtensionIsSupplied()
+        {
+            // Arrange
             const string folder = "SomeFolderPath";
             const string extension = "pdf";
 
@@ -71,7 +113,10 @@ namespace BainsTech.DocMailer.UnitTests.Components
             fileSystemAdapterSub.GetFiles(folder, extension).Returns(gotFiles);
             configurationSettingsSub.GetEmailForCompany(gotCompanyName).Returns(mappedCompanyEmail);
 
+            // Act
             var result = documentHandler.GetDocuments(folder, extension).ToList();
+
+            // Assert
             result.Count.Should().Be(1);
             var document = result.First();
             document.EmailAddress.Should().Be(mappedCompanyEmail);
@@ -79,5 +124,7 @@ namespace BainsTech.DocMailer.UnitTests.Components
             document.FilePath.Should().Be(gotFiles[0]);
             document.Status.Should().Be(DocumentStatus.ReadyToSend);
         }
+
+        
     }
 }
