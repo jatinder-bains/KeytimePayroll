@@ -39,10 +39,6 @@ namespace BainsTech.DocMailer.Components
 
                 foreach (var file in files)
                 {
-
-
-
-
                     var fileName = Path.GetFileName(file);
                     var companyNameKey = fileName?.Split(' ').First();
                     var emailAddress = companyNameKey != null
@@ -158,7 +154,7 @@ namespace BainsTech.DocMailer.Components
             var fileNameElements = fileName.Split(' ');
             if (fileNameElements.Length != payrollFileElementsCount && fileNameElements.Length != payeFileElementsCount)
             {
-                return $"Unsupported file name format";
+                return "Unsupported file name format";
             }
 
             var documentTypeString= fileNameElements[0];
