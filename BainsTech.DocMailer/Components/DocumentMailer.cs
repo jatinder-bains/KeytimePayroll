@@ -35,15 +35,21 @@ namespace BainsTech.DocMailer.Components
             this.mailMessageAdapterFactory = mailMessageAdapterFactory;
         }
 
-        public void EmailDocuments(IReadOnlyCollection<Document> documents)
+        public string EmailDocuments(IReadOnlyCollection<Document> documents)
         {
+            if (documents.Count(d => d.DocumentType == DocumentType.Paye) > 0 &&
+                documents.Count(d => d.DocumentType == DocumentType.Payroll) > 0)
+            {
+                return "ERROR: Folder contains Payroll and Paye documents !";
+            }
+
             var documentsGroupedByEmail = documents.GroupBy(d => d.EmailAddress).ToList();
 
             Parallel.ForEach(documentsGroupedByEmail, (g) =>
             {
                 EmailDocumentsForSameRecipient(g.ToList());
-
             });
+            return null;
         }
 
         private void EmailDocumentsForSameRecipient(IReadOnlyCollection<Document> documents)

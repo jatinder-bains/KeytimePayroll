@@ -39,20 +39,7 @@ namespace BainsTech.DocMailer.Components
 
                 foreach (var file in files)
                 {
-                    var fileName = Path.GetFileName(file);
-                    var companyNameKey = fileName?.Split(' ').First();
-                    var emailAddress = companyNameKey != null
-                        ? configurationSettings.GetEmailForCompany(companyNameKey)
-                        : "??";
-
-                    var doc = new Document
-                    {
-                        FilePath = file,
-                        FileName = fileName,
-                        EmailAddress = emailAddress,
-                    };
-
-                    SetDocumentStatus(doc, emailAddress);
+                    var doc = GetDocument(file);
                     docs.Add(doc);
                 }
             }
@@ -174,6 +161,49 @@ namespace BainsTech.DocMailer.Components
 
             month = months[date.Month - 1];
             return null; // no errors;
+        }
+
+        private Document GetDocument(string fullFilePath)
+        {
+            var document = new Document();
+
+            string companyName;
+            DocumentType type;
+            string month;
+
+            var fileName = Path.GetFileName(fullFilePath);
+
+            var incompatibleFileNameError = ExtractFileNameComponents(fileName, out companyName, out type, out month);
+
+            document.FilePath = fullFilePath;
+            document.FileName = fileName;
+            document.DocumentType = type;
+            document.EmailAddress = "??";
+
+            var docHasCompatibleFileName = string.IsNullOrEmpty(incompatibleFileNameError);
+
+            if (docHasCompatibleFileName)
+            {
+                //var docHasMappedEmail = !string.IsNullOrEmpty(emailAddress);
+                var emailAddress = configurationSettings.GetEmailForCompany(companyName);
+                if (!string.IsNullOrEmpty(emailAddress))
+                {
+                    document.EmailAddress = emailAddress;
+                    document.Status = DocumentStatus.ReadyToSend;
+                }
+                else
+                {
+                    document.EmailAddress = "??";
+                    document.Status = DocumentStatus.NoMappedEmail;
+                }
+            }
+            else
+            {
+                document.Status = DocumentStatus.IncompatibleFileName;
+                document.StatusDesc = incompatibleFileNameError;
+            }
+
+            return document;
         }
 
         private void SetDocumentStatus(Document document, string emailAddress)

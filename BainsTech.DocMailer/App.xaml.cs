@@ -13,5 +13,12 @@ namespace BainsTech.DocMailer
     /// </summary>  
     public partial class App : Application
     {
+        private void App_OnStartup(object sender, StartupEventArgs e)
+        {
+            SplashScreen screen = new SplashScreen("Resources/splash.jpg");
+            screen.Show(false, true);
+            Task.Delay(5000).Wait();
+            screen.Close(TimeSpan.FromSeconds(3));
+        }
     }
 }

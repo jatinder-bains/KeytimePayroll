@@ -194,14 +194,14 @@ namespace BainsTech.DocMailer.ViewModels
 
         private void RefreshCounts()
         {
-            StatusText = "";
+            //StatusText = "";
             TotalDocCount = Documents.Count;
             ReadyToSendCount = Documents.Count(d => d.Status == DocumentStatus.ReadyToSend || d.Status == DocumentStatus.SendFailed );
             CantSendCount = Documents.Count(d => d.Status == DocumentStatus.IncompatibleFileName ||
                                                  d.Status == DocumentStatus.NoMappedEmail);
             SentCount = Documents.Count(d => d.Status == DocumentStatus.Sent);
             SendFailedCount = Documents.Count(d => d.Status == DocumentStatus.SendFailed);
-            StatusText = "";
+            //StatusText = "";
         }
 
         public void MailDocuments(object val)
@@ -209,10 +209,19 @@ namespace BainsTech.DocMailer.ViewModels
             Task.Run(() =>
             {
                 StatusText = "Sending - please wait...";
+
                 Sending = true;
                 ReadyToSendCount = 0;
-                documentMailer.EmailDocuments(this.Documents.Where(d => d.IsReadyToSend).ToList());
-                StatusText = "Sent";
+                try
+                {
+                    var errorMsg = documentMailer.EmailDocuments(this.Documents.Where(d => d.IsReadyToSend).ToList());
+                    StatusText = errorMsg ?? "Sent";
+                }
+                catch (Exception ex)
+                {
+                    StatusText = ex.Message;
+                }
+
                 Sending = false;
                 RefreshCounts();
             });

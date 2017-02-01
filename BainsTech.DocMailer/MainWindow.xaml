@@ -18,12 +18,16 @@
             </Style.Triggers>
         </Style>
     </FrameworkElement.Resources>
-    <Grid>
+    <DockPanel>
+        <StatusBar DockPanel.Dock="Bottom" >
+            <TextBlock Text="{Binding Path=MailerDocumentsViewModel.StatusText}" Foreground="OrangeRed"/>
+        </StatusBar> 
+        <Grid DockPanel.Dock="Bottom">
         <Grid.RowDefinitions>
             <RowDefinition Height="60"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -52,8 +56,6 @@
             <Button Content="Email Documents" Margin="4" Style="{StaticResource DisableWhenRefreshingStyle}"
               IsEnabled="{Binding Path=MailerDocumentsViewModel.HaveDocsToSend}"
               Command="{Binding Path=MailerDocumentsViewModel.MailDocumentsCommand}"/>
-            <TextBlock Margin="4" Width="160" Foreground="OrangeRed"
-                 Text="{Binding Path=MailerDocumentsViewModel.StatusText}"/>
             <TextBlock Margin="4"
                  Text="{Binding Path=MailerDocumentsViewModel.TotalDocCount, StringFormat='Douments: {0}'}"/>
             <TextBlock Margin="4"
@@ -64,7 +66,7 @@
             <TextBlock Margin="4"
                  Text="{Binding Path=MailerDocumentsViewModel.SendFailedCount, StringFormat='Send failed: {0}'}"/>
         </StackPanel>
-        <ListView Grid.Row="3" AlternationCount="2" VerticalAlignment="Top" Margin="4"
+        <ListView Grid.Row="3" AlternationCount="2"  Margin="4"
               ItemsSource="{Binding Path=MailerDocumentsViewModel.Documents}">
             <FrameworkElement.Resources>
                 <Style TargetType="{x:Type ListViewItem}">
@@ -100,12 +102,13 @@
                 <GridView>
                     <GridViewColumn Header="Document" Width="250" DisplayMemberBinding="{Binding FileName}"/>
                     <GridViewColumn Header="Email Address" Width="250" DisplayMemberBinding="{Binding EmailAddress}"/>
-                    <GridViewColumn Header="StatusDesc" Width="400"
+                    <GridViewColumn Header="StatusDesc" Width="250"
                           DisplayMemberBinding="{Binding StatusDesc, UpdateSourceTrigger=PropertyChanged}"/>
-                    <GridViewColumn Header="Status" Width="400"
+                    <GridViewColumn Header="Status" Width="200"
                           DisplayMemberBinding="{Binding Status, UpdateSourceTrigger=PropertyChanged}"/>
                 </GridView>
             </ListView.View>
         </ListView>
     </Grid>
+    </DockPanel>
 </Window>
