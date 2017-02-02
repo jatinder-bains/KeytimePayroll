@@ -12,6 +12,7 @@ using System.Security.Cryptography;
 using BainsTech.DocMailer.Adapters;
 using BainsTech.DocMailer.Factories;
 using BainsTech.DocMailer.Infrastructure;
+using BainsTech.DocMailer.Repositories;
 
 namespace BainsTech.DocMailer
 {
@@ -41,6 +42,7 @@ namespace BainsTech.DocMailer
             //builder.RegisterType<MailMessageAdapter>().As<IMailMessageAdapter>().SingleInstance();
             builder.RegisterType<MailMessageAdapterFactory>().As<IMailMessageAdapterFactory>().SingleInstance();
             builder.RegisterType<FileSystemAdapter>().As<IFileSystemAdapter>().SingleInstance();
+            builder.RegisterType<FailedMovedDocumentsRepository>().As<IFailedMovedDocumentsRepository>().SingleInstance();
             
             Container = builder.Build();
 

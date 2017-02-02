@@ -89,6 +89,8 @@
     <Compile Include="Infrastructure\RelayCommand.cs" />
     <Compile Include="Exceptions\InvalidFileNameFormatException.cs" />
     <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="Repositories\FailedMovedDocumentsRepository.cs" />
+    <Compile Include="Repositories\IFailedMovedDocumentsRepository.cs" />
     <Compile Include="ViewModels\IMailerDocumentsViewModel.cs" />
     <Compile Include="ViewModels\IMainWindowViewModel.cs" />
     <Compile Include="ViewModels\MailerDocumentsViewModel.cs" />

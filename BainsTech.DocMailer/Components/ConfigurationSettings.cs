@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using BainsTech.DocMailer.Infrastructure;
 
 namespace BainsTech.DocMailer.Components
@@ -16,6 +17,7 @@ namespace BainsTech.DocMailer.Components
         public string SmtpAddress { get; }
         public int PortNumber { get; }
         public bool EnableSsl { get; }
+        public bool NoTrump { get; }
 
         public ConfigurationSettings()
         {
@@ -26,6 +28,14 @@ namespace BainsTech.DocMailer.Components
             SmtpAddress = appSettings["SmtpAddress"];
             PortNumber = int.Parse(appSettings["PortNumber"]);
             EnableSsl = bool.Parse(appSettings["EnableSsl"]);
+            try
+            {
+                NoTrump = bool.Parse(appSettings["NoTrump"]);
+            }
+            catch
+            {
+                NoTrump = false;
+            }
         }
 
         public string GetEmailForCompany(string companyName)

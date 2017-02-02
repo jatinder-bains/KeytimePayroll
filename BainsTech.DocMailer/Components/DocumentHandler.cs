@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Autofac.Util;
 using BainsTech.DocMailer.Adapters;
 using BainsTech.DocMailer.DataObjects;
+using BainsTech.DocMailer.Repositories;
 
 namespace BainsTech.DocMailer.Components
 {
@@ -15,15 +16,18 @@ namespace BainsTech.DocMailer.Components
         private readonly IConfigurationSettings configurationSettings;
         private readonly ILogger logger;
         private readonly IFileSystemAdapter fileSystemAdapter;
+        private readonly IFailedMovedDocumentsRepository failedMovedDocumentsRepository;
 
         public DocumentHandler(
             ILogger logger,
             IConfigurationSettings configurationSettings,
-            IFileSystemAdapter fileSystemAdapter)
+            IFileSystemAdapter fileSystemAdapter, 
+            IFailedMovedDocumentsRepository failedMovedDocumentsRepository)
         {
             this.configurationSettings = configurationSettings;
             this.logger = logger;
             this.fileSystemAdapter = fileSystemAdapter;
+            this.failedMovedDocumentsRepository = failedMovedDocumentsRepository;
         }
 
         public IEnumerable<Document> GetDocuments(string folderPath, string extension)
@@ -145,7 +149,7 @@ namespace BainsTech.DocMailer.Components
             }
 
             var documentTypeString= fileNameElements[0];
-            if (!Enum.TryParse(documentTypeString, out documentType))
+            if (!Enum.TryParse(documentTypeString, true, out documentType))
             {
                 return $"Unsupported document type '{documentTypeString}'";
             }
@@ -184,12 +188,14 @@ namespace BainsTech.DocMailer.Components
 
             if (docHasCompatibleFileName)
             {
-                //var docHasMappedEmail = !string.IsNullOrEmpty(emailAddress);
                 var emailAddress = configurationSettings.GetEmailForCompany(companyName);
                 if (!string.IsNullOrEmpty(emailAddress))
                 {
                     document.EmailAddress = emailAddress;
-                    document.Status = DocumentStatus.ReadyToSend;
+
+                    document.Status = UnBlacklistDocument(document)
+                        ? DocumentStatus.ReadyToSend
+                        : DocumentStatus.SentDocMoveFailed;
                 }
                 else
                 {
@@ -206,34 +212,23 @@ namespace BainsTech.DocMailer.Components
             return document;
         }
 
-        private void SetDocumentStatus(Document document, string emailAddress)
+        private bool UnBlacklistDocument(Document document)
         {
-            string companyName;
-            DocumentType type;
-            string month;
-
-            var incompatibleFileNameError = ExtractFileNameComponents(document.FileName, out companyName, out type, out month);
-            var docHasCompatibleFileName = string.IsNullOrEmpty(incompatibleFileNameError);
-            var docHasMappedEmail = !string.IsNullOrEmpty(emailAddress);
-
-            document.DocumentType = type;
-
-            if (docHasCompatibleFileName && docHasMappedEmail)
+            if (!failedMovedDocumentsRepository.Contains(document.FileName))
             {
-                document.Status = DocumentStatus.ReadyToSend;
-                return;
-            }
-            
-            if (!docHasCompatibleFileName)
-            {
-                document.Status = DocumentStatus.IncompatibleFileName;
-                document.StatusDesc = incompatibleFileNameError;
+                return true;
             }
 
-            if (!docHasMappedEmail)
+            logger.Trace($"Document {document.FileName} is blacklisted - attempt to move");
+            if (MoveDocument(document.FilePath))
             {
-                document.Status = DocumentStatus.NoMappedEmail;
+                failedMovedDocumentsRepository.Remove(document.FileName);
+                logger.Trace($"Document {document.FileName} is removed from blacklist");
+                return true;
             }
+            logger.Trace($"Faild to remove ddocument {document.FileName} blacklist");
+            return false;
         }
+        
     }
 }

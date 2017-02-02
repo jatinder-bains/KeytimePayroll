@@ -5,6 +5,8 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using BainsTech.DocMailer.Components;
+using ConfigurationSettings = BainsTech.DocMailer.Components.ConfigurationSettings;
 
 namespace BainsTech.DocMailer
 {
@@ -15,10 +17,14 @@ namespace BainsTech.DocMailer
     {
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
-            SplashScreen screen = new SplashScreen("Resources/splash.jpg");
-            screen.Show(false, true);
-            Task.Delay(5000).Wait();
-            screen.Close(TimeSpan.FromSeconds(3));
+            var config = new ConfigurationSettings();
+            if (!config.NoTrump)
+            {
+                var screen = new SplashScreen("Resources/splash.jpg");
+                screen.Show(false, true);
+                Task.Delay(5000).Wait();
+                screen.Close(TimeSpan.FromSeconds(3));
+            }
         }
     }
 }

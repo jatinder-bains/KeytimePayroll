@@ -11,8 +11,9 @@ namespace BainsTech.DocMailer.Components
         string SmtpAddress { get; }
         int PortNumber { get; }
         bool EnableSsl { get; }
-        
-       
+        bool NoTrump { get; }
+
+
         string GetEmailForCompany(string companyName);
         void SetSenderEmailAccountPassword(string encryptedPassword);
     }

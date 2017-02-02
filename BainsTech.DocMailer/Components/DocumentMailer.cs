@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Threading;
 using BainsTech.DocMailer.DataObjects;
 using BainsTech.DocMailer.Factories;
+using BainsTech.DocMailer.Repositories;
 
 // http://www.serversmtp.com/en/smtp-yahoo
 // https://msdn.microsoft.com/en-us/library/dd633709.aspx
@@ -22,17 +23,20 @@ namespace BainsTech.DocMailer.Components
         
         private readonly ILogger logger;
         private readonly IMailMessageAdapterFactory mailMessageAdapterFactory;
+        private readonly IFailedMovedDocumentsRepository failedMovedDocumentsRepository;
 
         public DocumentMailer(
             IConfigurationSettings configurationSettings,
             ILogger logger,
             IDocumentHandler documentHandler,
-            IMailMessageAdapterFactory mailMessageAdapterFactory)
+            IMailMessageAdapterFactory mailMessageAdapterFactory, 
+            IFailedMovedDocumentsRepository failedMovedDocumentsRepository)
         {
             this.configurationSettings = configurationSettings;
             this.logger = logger;
             this.documentHandler = documentHandler;
             this.mailMessageAdapterFactory = mailMessageAdapterFactory;
+            this.failedMovedDocumentsRepository = failedMovedDocumentsRepository;
         }
 
         public string EmailDocuments(IReadOnlyCollection<Document> documents)
@@ -73,14 +77,14 @@ namespace BainsTech.DocMailer.Components
                 var senderEmailAddress = configurationSettings.SenderEmailAddress;
                 var senderEmailAccountPasword = configurationSettings.SenderEmailAccountPassword;
                 
-                var subject = BuildSubjectFromDocuments(documents);
+                var subject = BuildSubjectFromFileName(documents.First().FileName);
                 var body = "Email body TBC" ;
 
                 using (var mailMessage = mailMessageAdapterFactory.CreateMailMessageAdapter())
                 {
                     mailMessage.SetFromAddress(senderEmailAddress);
                     mailMessage.AddToAdress(recipientEmailAddress);
-                    mailMessage.AddBccAddress(senderEmailAddress);
+                    //mailMessage.AddBccAddress(senderEmailAddress);
                     mailMessage.Subject = subject;
                     mailMessage.Body = body;
                     mailMessage.IsBodyHtml = true;
@@ -130,6 +134,7 @@ namespace BainsTech.DocMailer.Components
                         if (!documentHandler.MoveDocument(document.FilePath))
                         {
                             document.Status = DocumentStatus.SentDocMoveFailed;
+                            failedMovedDocumentsRepository.Add(document.FileName);
                         }
                     }
                 }
@@ -146,28 +151,6 @@ namespace BainsTech.DocMailer.Components
 
             return string.IsNullOrEmpty(error) ? $"{companyName} {type} {month}" : error;
         }
-
-        private string BuildSubjectFromDocuments(IReadOnlyCollection<Document> documents)
-        {
-            if (documents.Count == 0)
-            {
-                return BuildSubjectFromFileName(documents.First().FileName);
-            }
-            var countPayeDocs = documents.Count(d => d.DocumentType == DocumentType.Paye);
-            var countPayrollDocs = documents.Count(d => d.DocumentType == DocumentType.Payroll);
-
-            if (countPayeDocs == documents.Count)
-            {
-                return "PAYE documents";
-            }
-
-            if (countPayrollDocs == documents.Count)
-            {
-                return "Payroll documents";
-            }
-
-            return "Payroll and PAYE documents";
-        }
-
+        
     }
 }
