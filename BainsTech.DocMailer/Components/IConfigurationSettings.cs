@@ -12,6 +12,7 @@ namespace BainsTech.DocMailer.Components
         int PortNumber { get; }
         bool EnableSsl { get; }
         bool NoTrump { get; }
+        bool TestMode { get; }
 
 
         string GetEmailForCompany(string companyName);

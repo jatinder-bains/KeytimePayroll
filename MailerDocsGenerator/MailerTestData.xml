@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<MailerTestData>
+<Companies>
+  <Company>
+    <Name>Company1</Name>
+    <Email>info@company1.co.uk</Email>
+  </Company>
+  <Company>
+    <Name>Company2</Name>
+    <Email>info@company2.co.uk</Email>
+  </Company>
+</Companies>
+<PayeDocuments>
+  <PayeDocument>
+    <FileName>Paye Company1 31-03-16 </FileName>
+    <SendTo>info@company1.co.uk</SendTo>
+    <SentTo>info@company1.co.uk</SentTo>
+    <ExpectedSubject>Company1 Payrol for March</ExpectedSubject>
+    <ActualSubject>Company1 Payrol for March</ActualSubject>
+  </PayeDocument>
+  <PayeDocument>
+    <FileName>Paye Company2 31-03-16 </FileName>
+    <SendTo>info@company2.co.uk</SendTo>
+    <SentTo>info@company2.co.uk</SentTo>
+    <ExpectedSubject>Company2 Payrol for March</ExpectedSubject>
+    <ActualSubject>Company2 Payrol for March</ActualSubject>
+  </PayeDocument>
+</PayeDocuments>
+<PayrollDocuments>
+  <PayrollDocument>
+    <FileName>Payroll Company1 AllOrSingle 31-03-16 </FileName>
+    <SendTo>info@company1.co.uk</SendTo>
+    <SentTo>info@company1.co.uk</SentTo>
+    <ExpectedSubject>Company1 PAYE for March</ExpectedSubject>
+    <ActualSubject>Company1 PAYE for March</ActualSubject>
+  </PayrollDocument>
+  <PayrollDocument>
+    <FileName>Payroll Company2 AllOrSingle 31-03-16 </FileName>
+    <SendTo>info@company2.co.uk</SendTo>
+    <SentTo>info@company2.co.uk</SentTo>
+    <ExpectedSubject>Company2 PAYE for March</ExpectedSubject>
+    <ActualSubject>Company2 PAYE for March</ActualSubject>
+  </PayrollDocument>
+</PayrollDocuments>
+</MailerTestData>

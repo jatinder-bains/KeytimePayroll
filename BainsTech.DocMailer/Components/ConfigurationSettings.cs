@@ -18,6 +18,7 @@ namespace BainsTech.DocMailer.Components
         public int PortNumber { get; }
         public bool EnableSsl { get; }
         public bool NoTrump { get; }
+        public bool TestMode { get; }
 
         public ConfigurationSettings()
         {
@@ -28,6 +29,7 @@ namespace BainsTech.DocMailer.Components
             SmtpAddress = appSettings["SmtpAddress"];
             PortNumber = int.Parse(appSettings["PortNumber"]);
             EnableSsl = bool.Parse(appSettings["EnableSsl"]);
+            TestMode = bool.Parse(appSettings["TestMode"]);
             try
             {
                 NoTrump = bool.Parse(appSettings["NoTrump"]);

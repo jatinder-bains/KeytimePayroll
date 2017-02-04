@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="MailerTestData">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Companies">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" name="Company">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Name" type="xs:string" />
+                    <xs:element name="Email" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="PayeDocuments">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" name="PayeDocument">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="FileName" type="xs:string" />
+                    <xs:element name="SendTo" type="xs:string" />
+                    <xs:element name="SentTo" type="xs:string" />
+                    <xs:element name="ExpectedSubject" type="xs:string" />
+                    <xs:element name="ActualSubject" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="PayrollDocuments">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" name="PayrollDocument">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="FileName" type="xs:string" />
+                    <xs:element name="SendTo" type="xs:string" />
+                    <xs:element name="SentTo" type="xs:string" />
+                    <xs:element name="ExpectedSubject" type="xs:string" />
+                    <xs:element name="ActualSubject" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,8 +1,9 @@
-﻿using System.Security;
+﻿using System.ComponentModel;
+using System.Security;
 
 namespace BainsTech.DocMailer.ViewModels
 {
-    internal interface IMainWindowViewModel
+    internal interface IMainWindowViewModel: INotifyPropertyChanged
     {
         IPasswordConfigViewModel PasswordConfigViewModel { get; set; }
     }

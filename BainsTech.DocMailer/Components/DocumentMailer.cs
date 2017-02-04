@@ -25,6 +25,17 @@ namespace BainsTech.DocMailer.Components
         private readonly IMailMessageAdapterFactory mailMessageAdapterFactory;
         private readonly IFailedMovedDocumentsRepository failedMovedDocumentsRepository;
 
+        private const string emailBodyHtml = @"
+<p>Hello</p>
+<p>Please find {0} documents attached.</p>
+<p>Kind Regards,</p>
+<p>Harman Kang</p>
+<hr/>
+<h2><i>P S Kang and Co</i></h2>
+<h3>Chartered Certified Accountants</h3>
+<h3>Tel: 01753 694359</h3>
+";
+
         public DocumentMailer(
             IConfigurationSettings configurationSettings,
             ILogger logger,
@@ -43,9 +54,7 @@ namespace BainsTech.DocMailer.Components
         {
             if (documents.Count(d => d.DocumentType == DocumentType.Paye) > 0 &&
                 documents.Count(d => d.DocumentType == DocumentType.Payroll) > 0)
-            {
                 return "ERROR: Folder contains Payroll and Paye documents !";
-            }
 
             var documentsGroupedByEmail = documents.GroupBy(d => d.EmailAddress).ToList();
 
@@ -61,15 +70,21 @@ namespace BainsTech.DocMailer.Components
             var documentsToSend = documents as Document[] ?? documents.ToArray();
             var recipientEmailAddress = documentsToSend[0].EmailAddress;
 
+            if (documentsToSend[0].DocumentType == DocumentType.Unknown)
+            {
+                throw new InvalidOperationException("Can't send email for unknown document type");
+            }
+
             if (documents == null || !documentsToSend.Any()) throw new ArgumentException(@"Parameter is null or empty", nameof(documents));
             if(documentsToSend.Any(d => string.Compare(d.EmailAddress, recipientEmailAddress, StringComparison.CurrentCultureIgnoreCase) != 0))
                 throw new ArgumentException(@"Not all documents are for email address {recipientEmailAddress}", nameof(documents));
 
             var allSent = false;
 
+            var documentTypeString = documentsToSend[0].DocumentType == DocumentType.Paye ? "PAYE" : "payroll";
+
             try
             {
-                
                 var smtpAddress = configurationSettings.SmtpAddress;
                 var portNumber = configurationSettings.PortNumber;
                 var enableSsl = configurationSettings.EnableSsl;
@@ -78,7 +93,7 @@ namespace BainsTech.DocMailer.Components
                 var senderEmailAccountPasword = configurationSettings.SenderEmailAccountPassword;
                 
                 var subject = BuildSubjectFromFileName(documents.First().FileName);
-                var body = "Email body TBC" ;
+                var body = string.Format(emailBodyHtml, documentTypeString);
 
                 using (var mailMessage = mailMessageAdapterFactory.CreateMailMessageAdapter())
                 {
@@ -98,19 +113,15 @@ namespace BainsTech.DocMailer.Components
                         smtpClient.EnableSssl = enableSsl;
 
                         foreach (var document in documents)
-                        {
                             document.Status = DocumentStatus.Sending;
-                        }
-                        
+
                         logger.Info($"Sending {documents.Count} to {recipientEmailAddress}...");
 
                         smtpClient.Send(mailMessage);
                         //Task.Delay(2000).Wait();
 
                         foreach (var document in documents)
-                        {
                             document.Status = DocumentStatus.Sent;
-                        }
                         allSent = true;
                         logger.Info($"Sent {documents.Count} to {recipientEmailAddress}.");
                     }
@@ -128,16 +139,12 @@ namespace BainsTech.DocMailer.Components
             finally
             {
                 if (allSent)
-                {
                     foreach (var document in documents)
-                    {
                         if (!documentHandler.MoveDocument(document.FilePath))
                         {
                             document.Status = DocumentStatus.SentDocMoveFailed;
                             failedMovedDocumentsRepository.Add(document.FileName);
                         }
-                    }
-                }
             }
         }
 
