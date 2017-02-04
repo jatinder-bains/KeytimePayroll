@@ -106,7 +106,7 @@ namespace BainsTech.DocMailer.Components
 
                     mailMessage.AddAttachments(documents.Select(d => d.FilePath).ToArray());
 
-                    using (var smtpClient = mailMessageAdapterFactory.CreateSmtpClientAdapter(smtpAddress, portNumber))
+                    using (var smtpClient = mailMessageAdapterFactory.CreateSmtpClientAdapter(smtpAddress, portNumber, configurationSettings.TestMode))
                     {
                         smtpClient.SetCredentials(senderEmailAddress, senderEmailAccountPasword);
 
@@ -117,8 +117,9 @@ namespace BainsTech.DocMailer.Components
 
                         logger.Info($"Sending {documents.Count} to {recipientEmailAddress}...");
 
+//                        Task.Delay(5000).Wait();
                         smtpClient.Send(mailMessage);
-                        //Task.Delay(2000).Wait();
+                        
 
                         foreach (var document in documents)
                             document.Status = DocumentStatus.Sent;
@@ -155,8 +156,9 @@ namespace BainsTech.DocMailer.Components
             string month;
 
             var error = documentHandler.ExtractFileNameComponents(fileName, out companyName, out type, out month);
+            var typeString = type == DocumentType.Paye ? "PAYE" : type.ToString();
 
-            return string.IsNullOrEmpty(error) ? $"{companyName} {type} {month}" : error;
+            return string.IsNullOrEmpty(error) ? $"{companyName} {typeString} {month}" : error;
         }
         
     }

@@ -9,9 +9,12 @@ namespace BainsTech.DocMailer.Factories
             return new MailMessageAdapter();
         }
 
-        public ISmtpClientAdapter CreateSmtpClientAdapter(string host, int port)
+        public ISmtpClientAdapter CreateSmtpClientAdapter(string host, int port, bool testMode)
         {
-            return new SmtpClientAdapter(host, port);
+            if(!testMode)
+                return new SmtpClientAdapter(host, port);
+
+            return new MockSmtpClientAdapter();
         }
     }
 }

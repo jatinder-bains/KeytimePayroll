@@ -55,9 +55,9 @@ namespace MailerDocsGenerator
             var companies = new List<MailerTestDataCompany>(100);
             for (var i = 1; i <= 100; i++)
             {
-                var name = $"Company{i}";
+                var name = $"Company{i}".ToLower();
 
-                var email = i % 10 == 0 ? null : $"info@{name}.co.uk";
+                var email = i % 10 == 0 ? null : $"info@{name}.co.uk".ToLower();
                 companies.Add(new MailerTestDataCompany {Name = name, Email = email});
             }
 
@@ -107,6 +107,7 @@ namespace MailerDocsGenerator
             foreach (var company in testData.Companies)
             {
                 Console.WriteLine($"Adding PAYE documents for company {company.Name}...");
+                var hasEmail = !string.IsNullOrEmpty(company.Email);
                 // Create PAYE docs
                 for (var datesIdx = 0; datesIdx < dates.Length; datesIdx++)
                 {
@@ -114,12 +115,16 @@ namespace MailerDocsGenerator
                     var fileName = $@"{PayeDocsDir}\Paye {company.Name} {date}.pdf";
                     File.Copy("DocTemplates\\PAYE.pdf", fileName);
 
+                    
                     var expectedSubject = $"{company.Name} PAYE {DateToMonthName(date)}";
+
                     payeDocs.Add(new MailerTestDataPayeDocument
                     {
-                        FileName = fileName,
-                        SendTo = company.Email,
-                        ExpectedSubject = expectedSubject
+                        FileName = Path.GetFileName(fileName).ToLower(),
+                        SendTo = company.Email?? "none",
+                        ExpectedSubject = hasEmail ? expectedSubject : "none",
+                        SentTo= hasEmail? "TBC" : "none",
+                        ActualSubject = hasEmail ? "TBC" : "none",
                     });
                 }
             }
@@ -135,12 +140,13 @@ namespace MailerDocsGenerator
             {
                 companyNum++;
                 Console.WriteLine($"Adding payroll documents for company {company.Name}...");
+                var hasEmail = !string.IsNullOrEmpty(company.Email);
                 // Create PAYROLL docs
                 for (var datesIdx = 0; datesIdx < dates.Length; datesIdx++)
                 {
                     var date = dates[datesIdx];
 
-                    var expectedSubject = $"{company.Name} payroll {DateToMonthName(date)}";
+                    var expectedSubject = $"{company.Name} Payroll {DateToMonthName(date)}";
                     var fileNames = new List<string>();
 
                     if (companyNum % 2 == 0)
@@ -161,9 +167,10 @@ namespace MailerDocsGenerator
                         File.Copy("DocTemplates\\Payroll.pdf", fn);
                         payrollDocs.Add(new MailerTestDataPayrollDocument
                         {
-                            FileName = fn,
-                            SendTo = company.Email,
-                            ExpectedSubject = expectedSubject
+                            FileName = Path.GetFileName(fn).ToLower(),
+                            SendTo = hasEmail? company.Email : "none",
+                            ExpectedSubject = hasEmail? expectedSubject : "none",
+                            SentTo = hasEmail? "TBC" : "none"
                         });
                     }
                 }

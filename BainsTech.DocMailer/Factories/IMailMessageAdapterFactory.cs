@@ -5,6 +5,6 @@ namespace BainsTech.DocMailer.Factories
     internal interface IMailMessageAdapterFactory
     {
         IMailMessageAdapter CreateMailMessageAdapter();
-        ISmtpClientAdapter CreateSmtpClientAdapter(string host, int port);
+        ISmtpClientAdapter CreateSmtpClientAdapter(string host, int port, bool testMode);
     }
 }

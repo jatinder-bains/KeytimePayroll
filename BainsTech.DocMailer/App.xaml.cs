@@ -20,10 +20,10 @@ namespace BainsTech.DocMailer
             var config = new ConfigurationSettings();
             if (!config.NoTrump)
             {
-                var screen = new SplashScreen("Resources/splash.jpg");
-                screen.Show(false, true);
-                Task.Delay(5000).Wait();
-                screen.Close(TimeSpan.FromSeconds(3));
+                //var screen = new SplashScreen("Resources/splash.jpg");
+                //screen.Show(false, true);
+                //Task.Delay(5000).Wait();
+                //screen.Close(TimeSpan.FromSeconds(3));
             }
         }
     }
